@@ -9,7 +9,173 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admin_users: {
+        Row: {
+          created_at: string
+          id: string
+          password_hash: string
+          role: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_hash: string
+          role: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_hash?: string
+          role?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      applicant_specializations: {
+        Row: {
+          applicant_id: string
+          id: string
+          specialization_id: string
+        }
+        Insert: {
+          applicant_id: string
+          id?: string
+          specialization_id: string
+        }
+        Update: {
+          applicant_id?: string
+          id?: string
+          specialization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applicant_specializations_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applicant_specializations_specialization_id_fkey"
+            columns: ["specialization_id"]
+            isOneToOne: false
+            referencedRelation: "specializations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      applicants: {
+        Row: {
+          budget: boolean
+          citizenship: string | null
+          contact_person_name: string | null
+          contact_person_phone: string | null
+          created_at: string
+          disability: boolean | null
+          education_document: string | null
+          education_type: string
+          email: string | null
+          full_name: string
+          gender: string | null
+          how_did_you_know: string | null
+          id: string
+          is_adult: boolean | null
+          phone: string
+          responsible_id: string
+          stream: number | null
+          study_form: string
+          updated_at: string
+        }
+        Insert: {
+          budget: boolean
+          citizenship?: string | null
+          contact_person_name?: string | null
+          contact_person_phone?: string | null
+          created_at?: string
+          disability?: boolean | null
+          education_document?: string | null
+          education_type: string
+          email?: string | null
+          full_name: string
+          gender?: string | null
+          how_did_you_know?: string | null
+          id?: string
+          is_adult?: boolean | null
+          phone: string
+          responsible_id: string
+          stream?: number | null
+          study_form: string
+          updated_at?: string
+        }
+        Update: {
+          budget?: boolean
+          citizenship?: string | null
+          contact_person_name?: string | null
+          contact_person_phone?: string | null
+          created_at?: string
+          disability?: boolean | null
+          education_document?: string | null
+          education_type?: string
+          email?: string | null
+          full_name?: string
+          gender?: string | null
+          how_did_you_know?: string | null
+          id?: string
+          is_adult?: boolean | null
+          phone?: string
+          responsible_id?: string
+          stream?: number | null
+          study_form?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applicants_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "responsible_persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      responsible_persons: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      specializations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

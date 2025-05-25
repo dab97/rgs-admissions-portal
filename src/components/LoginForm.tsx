@@ -4,44 +4,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Shield, User, Lock, GraduationCap } from 'lucide-react';
+import { User, Lock, GraduationCap, Loader2 } from 'lucide-react';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { APP_CONSTANTS } from '@/constants';
 
 const LoginForm = ({ onLogin }: { onLogin: (role: string) => void }) => {
-  const { toast } = useToast();
+  const { login, isLoading } = useAdminAuth();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Временная логика аутентификации (будет заменена на Supabase)
-    setTimeout(() => {
-      if (formData.username === 'admin' && formData.password === 'admin123') {
-        toast({
-          title: "Успешный вход!",
-          description: "Добро пожаловать в админ панель.",
-        });
-        onLogin('admin');
-      } else if (formData.username === 'moderator' && formData.password === 'mod123') {
-        toast({
-          title: "Успешный вход!",
-          description: "Добро пожаловать, модератор.",
-        });
-        onLogin('moderator');
-      } else {
-        toast({
-          title: "Ошибка входа",
-          description: "Неверный логин или пароль.",
-          variant: "destructive",
-        });
-      }
-      setIsLoading(false);
-    }, 1000);
+    
+    const result = await login(formData.username, formData.password);
+    if (result.success && result.user) {
+      onLogin(result.user.role);
+    }
   };
 
   return (
@@ -57,7 +37,7 @@ const LoginForm = ({ onLogin }: { onLogin: (role: string) => void }) => {
                 Админ панель
               </CardTitle>
               <CardDescription className="text-gray-600 mt-2">
-                Российский Государственный Социальный Университет
+                {APP_CONSTANTS.UNIVERSITY.FULL_NAME}
               </CardDescription>
             </div>
           </CardHeader>
@@ -100,7 +80,14 @@ const LoginForm = ({ onLogin }: { onLogin: (role: string) => void }) => {
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 font-semibold shadow-lg"
                 disabled={isLoading}
               >
-                {isLoading ? 'Вход...' : 'Войти в систему'}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Вход...
+                  </>
+                ) : (
+                  'Войти в систему'
+                )}
               </Button>
             </form>
 

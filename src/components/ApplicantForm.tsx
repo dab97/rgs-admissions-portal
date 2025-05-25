@@ -8,70 +8,97 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { UserPlus, Phone, Mail, GraduationCap } from 'lucide-react';
+import { UserPlus, Phone, Mail, GraduationCap, Loader2 } from 'lucide-react';
+import { useApplicantData } from '@/hooks/useApplicantData';
+import { useApplicantSubmit } from '@/hooks/useApplicantSubmit';
+import { APP_CONSTANTS, ApplicantFormData } from '@/constants';
 
 const ApplicantForm = () => {
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    responsible: '',
-    fullName: '',
+  const { responsiblePersons, specializations, loading, error } = useApplicantData();
+  const { submitApplicant, isSubmitting } = useApplicantSubmit();
+
+  const [formData, setFormData] = useState<ApplicantFormData>({
+    responsible_id: '',
+    full_name: '',
     phone: '',
     email: '',
-    specializations: [],
-    studyForm: '',
-    educationType: '',
-    budget: '',
-    stream: '',
+    specialization_ids: [],
+    study_form: '',
+    education_type: '',
+    budget: false,
+    stream: undefined,
     gender: '',
     citizenship: '',
-    isAdult: '',
-    disability: '',
-    educationDocument: '',
-    contactPersonName: '',
-    contactPersonPhone: '',
-    howDidYouKnow: ''
+    is_adult: undefined,
+    disability: undefined,
+    education_document: '',
+    contact_person_name: '',
+    contact_person_phone: '',
+    how_did_you_know: ''
   });
 
-  const responsibleOptions = [
-    'Иванов И.И.',
-    'Петрова А.С.',
-    'Сидоров М.К.',
-    'Козлова Е.В.',
-    'Морозов Д.А.'
-  ];
-
-  const specializationOptions = [
-    'Психология',
-    'Социальная работа',
-    'Юриспруденция',
-    'Экономика',
-    'Менеджмент',
-    'Информационные технологии',
-    'Педагогическое образование',
-    'Лингвистика',
-    'Журналистика',
-    'Реклама и связи с общественностью'
-  ];
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Здесь будет интеграция с Supabase
-    console.log('Form submitted:', formData);
-    toast({
-      title: "Заявка принята!",
-      description: "Данные поступающего успешно сохранены в системе.",
-    });
+    
+    if (!formData.responsible_id || !formData.full_name || !formData.phone || 
+        !formData.study_form || !formData.education_type || 
+        formData.specialization_ids.length === 0) {
+      return;
+    }
+
+    const result = await submitApplicant(formData);
+    
+    if (result.success) {
+      // Сброс формы
+      setFormData({
+        responsible_id: '',
+        full_name: '',
+        phone: '',
+        email: '',
+        specialization_ids: [],
+        study_form: '',
+        education_type: '',
+        budget: false,
+        stream: undefined,
+        gender: '',
+        citizenship: '',
+        is_adult: undefined,
+        disability: undefined,
+        education_document: '',
+        contact_person_name: '',
+        contact_person_phone: '',
+        how_did_you_know: ''
+      });
+    }
   };
 
-  const handleSpecializationChange = (specialization: string, checked: boolean) => {
+  const handleSpecializationChange = (specializationId: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
-      specializations: checked 
-        ? [...prev.specializations, specialization]
-        : prev.specializations.filter(s => s !== specialization)
+      specialization_ids: checked 
+        ? [...prev.specialization_ids, specializationId]
+        : prev.specialization_ids.filter(id => id !== specializationId)
     }));
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Загрузка данных...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -85,7 +112,7 @@ const ApplicantForm = () => {
                   Регистрация поступающего
                 </CardTitle>
                 <CardDescription className="text-blue-100">
-                  Российский Государственный Социальный Университет в г. Минске
+                  {APP_CONSTANTS.UNIVERSITY.FULL_NAME}
                 </CardDescription>
               </div>
             </div>
@@ -97,13 +124,15 @@ const ApplicantForm = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="responsible">Ответственный *</Label>
-                  <Select onValueChange={(value) => setFormData(prev => ({ ...prev, responsible: value }))}>
+                  <Select onValueChange={(value) => setFormData(prev => ({ ...prev, responsible_id: value }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите ответственного" />
                     </SelectTrigger>
                     <SelectContent>
-                      {responsibleOptions.map((option) => (
-                        <SelectItem key={option} value={option}>{option}</SelectItem>
+                      {responsiblePersons.map((person) => (
+                        <SelectItem key={person.id} value={person.id}>
+                          {person.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -118,8 +147,9 @@ const ApplicantForm = () => {
                       id="fullName"
                       placeholder="Введите ФИО"
                       className="pl-10"
-                      value={formData.fullName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                      value={formData.full_name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+                      required
                     />
                   </div>
                 </div>
@@ -137,6 +167,7 @@ const ApplicantForm = () => {
                       className="pl-10"
                       value={formData.phone}
                       onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      required
                     />
                   </div>
                 </div>
@@ -161,16 +192,17 @@ const ApplicantForm = () => {
               <div className="space-y-3">
                 <Label>Направления подготовки *</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {specializationOptions.map((specialization) => (
-                    <div key={specialization} className="flex items-center space-x-2">
+                  {specializations.map((specialization) => (
+                    <div key={specialization.id} className="flex items-center space-x-2">
                       <Checkbox
-                        id={specialization}
+                        id={specialization.id}
+                        checked={formData.specialization_ids.includes(specialization.id)}
                         onCheckedChange={(checked) => 
-                          handleSpecializationChange(specialization, checked as boolean)
+                          handleSpecializationChange(specialization.id, checked as boolean)
                         }
                       />
-                      <Label htmlFor={specialization} className="text-sm">
-                        {specialization}
+                      <Label htmlFor={specialization.id} className="text-sm">
+                        {specialization.name}
                       </Label>
                     </div>
                   ))}
@@ -182,52 +214,45 @@ const ApplicantForm = () => {
                 <div className="space-y-3">
                   <Label>Форма обучения *</Label>
                   <RadioGroup 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, studyForm: value }))}
+                    value={formData.study_form}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, study_form: value }))}
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="full-time" id="full-time" />
-                      <Label htmlFor="full-time">Очная</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="part-time" id="part-time" />
-                      <Label htmlFor="part-time">Очно-Заочная</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="distance" id="distance" />
-                      <Label htmlFor="distance">Заочная</Label>
-                    </div>
+                    {APP_CONSTANTS.STUDY_FORMS.map((form) => (
+                      <div key={form.value} className="flex items-center space-x-2">
+                        <RadioGroupItem value={form.value} id={form.value} />
+                        <Label htmlFor={form.value}>{form.label}</Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </div>
 
                 <div className="space-y-3">
                   <Label>Вид образования *</Label>
                   <RadioGroup 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, educationType: value }))}
+                    value={formData.education_type}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, education_type: value }))}
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="bachelor" id="bachelor" />
-                      <Label htmlFor="bachelor">Бакалавриат</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="master" id="master" />
-                      <Label htmlFor="master">Магистратура</Label>
-                    </div>
+                    {APP_CONSTANTS.EDUCATION_TYPES.map((type) => (
+                      <div key={type.value} className="flex items-center space-x-2">
+                        <RadioGroupItem value={type.value} id={type.value} />
+                        <Label htmlFor={type.value}>{type.label}</Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </div>
 
                 <div className="space-y-3">
                   <Label>Бюджет *</Label>
                   <RadioGroup 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
+                    value={formData.budget.toString()}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, budget: value === 'true' }))}
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="yes" id="budget-yes" />
-                      <Label htmlFor="budget-yes">Да</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="no" id="budget-no" />
-                      <Label htmlFor="budget-no">Нет</Label>
-                    </div>
+                    {APP_CONSTANTS.YES_NO_OPTIONS.map((option) => (
+                      <div key={option.value.toString()} className="flex items-center space-x-2">
+                        <RadioGroupItem value={option.value.toString()} id={`budget-${option.value}`} />
+                        <Label htmlFor={`budget-${option.value}`}>{option.label}</Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </div>
               </div>
@@ -236,13 +261,16 @@ const ApplicantForm = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="space-y-2">
                   <Label>Поток</Label>
-                  <Select onValueChange={(value) => setFormData(prev => ({ ...prev, stream: value }))}>
+                  <Select onValueChange={(value) => setFormData(prev => ({ ...prev, stream: parseInt(value) }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите поток" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">1 поток</SelectItem>
-                      <SelectItem value="2">2 поток</SelectItem>
+                      {APP_CONSTANTS.STREAMS.map((stream) => (
+                        <SelectItem key={stream.value} value={stream.value.toString()}>
+                          {stream.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -254,8 +282,11 @@ const ApplicantForm = () => {
                       <SelectValue placeholder="Выберите пол" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="male">Мужской</SelectItem>
-                      <SelectItem value="female">Женский</SelectItem>
+                      {APP_CONSTANTS.GENDERS.map((gender) => (
+                        <SelectItem key={gender.value} value={gender.value}>
+                          {gender.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -272,16 +303,15 @@ const ApplicantForm = () => {
                 <div className="space-y-3">
                   <Label>Совершеннолетний</Label>
                   <RadioGroup 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, isAdult: value }))}
+                    value={formData.is_adult?.toString() || ''}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, is_adult: value === 'true' }))}
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="yes" id="adult-yes" />
-                      <Label htmlFor="adult-yes">Да</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="no" id="adult-no" />
-                      <Label htmlFor="adult-no">Нет</Label>
-                    </div>
+                    {APP_CONSTANTS.YES_NO_OPTIONS.map((option) => (
+                      <div key={option.value.toString()} className="flex items-center space-x-2">
+                        <RadioGroupItem value={option.value.toString()} id={`adult-${option.value}`} />
+                        <Label htmlFor={`adult-${option.value}`}>{option.label}</Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </div>
               </div>
@@ -291,16 +321,15 @@ const ApplicantForm = () => {
                 <div className="space-y-3">
                   <Label>Инвалидность</Label>
                   <RadioGroup 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, disability: value }))}
+                    value={formData.disability?.toString() || ''}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, disability: value === 'true' }))}
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="yes" id="disability-yes" />
-                      <Label htmlFor="disability-yes">Да</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="no" id="disability-no" />
-                      <Label htmlFor="disability-no">Нет</Label>
-                    </div>
+                    {APP_CONSTANTS.YES_NO_OPTIONS.map((option) => (
+                      <div key={option.value.toString()} className="flex items-center space-x-2">
+                        <RadioGroupItem value={option.value.toString()} id={`disability-${option.value}`} />
+                        <Label htmlFor={`disability-${option.value}`}>{option.label}</Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </div>
 
@@ -308,8 +337,8 @@ const ApplicantForm = () => {
                   <Label>Документ об образовании</Label>
                   <Input
                     placeholder="Аттестат, диплом и т.д."
-                    value={formData.educationDocument}
-                    onChange={(e) => setFormData(prev => ({ ...prev, educationDocument: e.target.value }))}
+                    value={formData.education_document}
+                    onChange={(e) => setFormData(prev => ({ ...prev, education_document: e.target.value }))}
                   />
                 </div>
               </div>
@@ -320,8 +349,8 @@ const ApplicantForm = () => {
                   <Label>Ф.И.О. Контактного лица</Label>
                   <Input
                     placeholder="Введите ФИО"
-                    value={formData.contactPersonName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contactPersonName: e.target.value }))}
+                    value={formData.contact_person_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, contact_person_name: e.target.value }))}
                   />
                 </div>
 
@@ -329,8 +358,8 @@ const ApplicantForm = () => {
                   <Label>Телефон Контактного лица</Label>
                   <Input
                     placeholder="+375 (29) 123-45-67"
-                    value={formData.contactPersonPhone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contactPersonPhone: e.target.value }))}
+                    value={formData.contact_person_phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, contact_person_phone: e.target.value }))}
                   />
                 </div>
               </div>
@@ -340,8 +369,8 @@ const ApplicantForm = () => {
                 <Label>Откуда узнали о нас?</Label>
                 <Textarea
                   placeholder="Социальные сети, друзья, реклама и т.д."
-                  value={formData.howDidYouKnow}
-                  onChange={(e) => setFormData(prev => ({ ...prev, howDidYouKnow: e.target.value }))}
+                  value={formData.how_did_you_know}
+                  onChange={(e) => setFormData(prev => ({ ...prev, how_did_you_know: e.target.value }))}
                   className="min-h-[80px]"
                 />
               </div>
@@ -349,8 +378,16 @@ const ApplicantForm = () => {
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 text-lg font-semibold shadow-lg"
+                disabled={isSubmitting}
               >
-                Подать заявку
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Отправка...
+                  </>
+                ) : (
+                  'Подать заявку'
+                )}
               </Button>
             </form>
           </CardContent>
