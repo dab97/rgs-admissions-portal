@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   BarChart3,
   Users,
@@ -10,7 +11,6 @@ import {
   TrendingUp,
   UserCheck,
   Calendar,
-  Search,
 } from "lucide-react";
 
 import {
@@ -42,11 +42,6 @@ const menuItems = [
     title: "Статистика",
     url: "/admin/statistics",
     icon: BarChart3,
-  },
-  {
-    title: "Аналитика",
-    url: "/admin/analytics",
-    icon: TrendingUp,
   },
   {
     title: "Отчеты",
@@ -92,6 +87,12 @@ const settingsItems = [
 ];
 
 export function AdminSidebar() {
+  const location = useLocation();
+
+  const isActive = (url: string) => {
+    return location.pathname === url;
+  };
+
   return (
     <Sidebar variant="inset" className="border-r-2">
       <SidebarHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -115,11 +116,16 @@ export function AdminSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="hover:bg-blue-50 hover:text-blue-700">
-                    <a href={item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    className={`hover:bg-blue-50 hover:text-blue-700 ${
+                      isActive(item.url) ? 'bg-blue-100 text-blue-700' : ''
+                    }`}
+                  >
+                    <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -135,11 +141,16 @@ export function AdminSidebar() {
             <SidebarMenu>
               {analyticsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="hover:bg-blue-50 hover:text-blue-700">
-                    <a href={item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    className={`hover:bg-blue-50 hover:text-blue-700 ${
+                      isActive(item.url) ? 'bg-blue-100 text-blue-700' : ''
+                    }`}
+                  >
+                    <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -155,11 +166,16 @@ export function AdminSidebar() {
             <SidebarMenu>
               {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="hover:bg-blue-50 hover:text-blue-700">
-                    <a href={item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    className={`hover:bg-blue-50 hover:text-blue-700 ${
+                      isActive(item.url) ? 'bg-blue-100 text-blue-700' : ''
+                    }`}
+                  >
+                    <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

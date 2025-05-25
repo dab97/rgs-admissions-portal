@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Users, 
   UserCheck, 
@@ -9,26 +10,39 @@ import {
   TrendingUp, 
   Calendar,
   DollarSign,
-  UserX,
   FileText
 } from 'lucide-react';
+import { useAdminStatistics } from '@/hooks/useAdminStatistics';
 
 const StatisticsCards = () => {
-  // Примерные данные (будут заменены на данные из Supabase)
-  const stats = {
-    totalApplicants: 1247,
-    newToday: 23,
-    approved: 892,
-    pending: 355,
-    bachelor: 876,
-    master: 371,
-    budget: 654,
-    paid: 593,
-    male: 512,
-    female: 735,
-    fullTime: 789,
-    partTime: 458,
-  };
+  const stats = useAdminStatistics();
+
+  if (stats.loading) {
+    return (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <Card key={index}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-5 w-5" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-16 mb-2" />
+              <Skeleton className="h-4 w-20" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (stats.error) {
+    return (
+      <div className="p-4 text-center text-red-600">
+        {stats.error}
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -61,7 +75,7 @@ const StatisticsCards = () => {
         <CardContent>
           <div className="text-2xl font-bold text-gray-900">{stats.approved}</div>
           <p className="text-xs text-gray-500 mt-2">
-            {Math.round((stats.approved / stats.totalApplicants) * 100)}% от общего числа
+            {stats.totalApplicants > 0 ? Math.round((stats.approved / stats.totalApplicants) * 100) : 0}% от общего числа
           </p>
         </CardContent>
       </Card>
@@ -124,10 +138,10 @@ const StatisticsCards = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-gray-900">
-            {Math.round((stats.female / stats.totalApplicants) * 100)}% Ж
+            {stats.totalApplicants > 0 ? Math.round((stats.female / stats.totalApplicants) * 100) : 0}% Ж
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            {Math.round((stats.male / stats.totalApplicants) * 100)}% мужчин
+            {stats.totalApplicants > 0 ? Math.round((stats.male / stats.totalApplicants) * 100) : 0}% мужчин
           </p>
         </CardContent>
       </Card>
@@ -143,7 +157,7 @@ const StatisticsCards = () => {
         <CardContent>
           <div className="text-2xl font-bold text-gray-900">{stats.fullTime}</div>
           <p className="text-xs text-gray-500 mt-2">
-            {stats.partTime} заочная/очно-заочная
+            {stats.partTime} очно-заочная, {stats.distance} заочная
           </p>
         </CardContent>
       </Card>
@@ -157,9 +171,12 @@ const StatisticsCards = () => {
           <TrendingUp className="h-5 w-5 text-orange-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-gray-900">+12.5%</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {stats.newToday > 0 ? '+' : ''}
+            {stats.totalApplicants > 0 ? ((stats.newToday / stats.totalApplicants) * 100).toFixed(1) : '0'}%
+          </div>
           <p className="text-xs text-gray-500 mt-2">
-            Превышает план на 8%
+            За сегодня: {stats.newToday} заявок
           </p>
         </CardContent>
       </Card>

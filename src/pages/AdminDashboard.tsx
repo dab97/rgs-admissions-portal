@@ -7,6 +7,7 @@ import ChartsSection from '@/components/admin/ChartsSection';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   BarChart3, 
   Download, 
@@ -15,8 +16,25 @@ import {
   Calendar,
   Bell
 } from 'lucide-react';
+import { useRecentApplicants } from '@/hooks/useRecentApplicants';
 
 const AdminDashboard = () => {
+  const { applicants: recentApplicants, loading: applicantsLoading } = useRecentApplicants();
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Только что';
+    if (diffInHours === 1) return '1 час назад';
+    if (diffInHours < 24) return `${diffInHours} часов назад`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return '1 день назад';
+    return `${diffInDays} дней назад`;
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
@@ -61,7 +79,7 @@ const AdminDashboard = () => {
                       Новые заявки требуют внимания
                     </h3>
                     <p className="text-blue-700 text-sm mt-1">
-                      23 новые заявки поступили сегодня и ожидают рассмотрения
+                      {recentApplicants.length} новых заявок поступили и ожидают рассмотрения
                     </p>
                   </div>
                   <Badge className="bg-blue-600 text-white">
@@ -140,30 +158,55 @@ const AdminDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { name: 'Иванова Анна Сергеевна', specialization: 'Психология', time: '2 часа назад', status: 'pending' },
-                    { name: 'Петров Максим Александрович', specialization: 'Юриспруденция', time: '3 часа назад', status: 'approved' },
-                    { name: 'Сидорова Елена Викторовна', specialization: 'Экономика', time: '5 часов назад', status: 'pending' },
-                    { name: 'Козлов Дмитрий Иванович', specialization: 'ИТ', time: '6 часов назад', status: 'approved' },
-                  ].map((applicant, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900">{applicant.name}</h4>
-                        <p className="text-sm text-gray-500">{applicant.specialization}</p>
+                {applicantsLoading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <Skeleton className="h-5 w-48 mb-2" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
+                        <div className="text-right">
+                          <Skeleton className="h-6 w-20 mb-1" />
+                          <Skeleton className="h-3 w-16" />
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <Badge 
-                          variant={applicant.status === 'approved' ? 'default' : 'secondary'}
-                          className={applicant.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}
-                        >
-                          {applicant.status === 'approved' ? 'Одобрено' : 'На рассмотрении'}
-                        </Badge>
-                        <p className="text-xs text-gray-400 mt-1">{applicant.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recentApplicants.length === 0 ? (
+                      <p className="text-center text-gray-500 py-8">
+                        Пока нет поданных заявок
+                      </p>
+                    ) : (
+                      recentApplicants.map((applicant, index) => (
+                        <div key={applicant.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900">{applicant.full_name}</h4>
+                            <p className="text-sm text-gray-500">
+                              {applicant.specializations.length > 0 
+                                ? applicant.specializations.join(', ')
+                                : 'Специализация не указана'
+                              }
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <Badge 
+                              variant="secondary"
+                              className="bg-yellow-100 text-yellow-700"
+                            >
+                              На рассмотрении
+                            </Badge>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {formatTimeAgo(applicant.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

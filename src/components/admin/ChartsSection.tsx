@@ -1,43 +1,38 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { useChartsData } from '@/hooks/useChartsData';
 
 const ChartsSection = () => {
-  // Примерные данные для графиков
-  const specializationData = [
-    { name: 'Психология', value: 245, color: '#3b82f6' },
-    { name: 'Юриспруденция', value: 189, color: '#8b5cf6' },
-    { name: 'Экономика', value: 156, color: '#06b6d4' },
-    { name: 'Менеджмент', value: 134, color: '#10b981' },
-    { name: 'ИТ', value: 98, color: '#f59e0b' },
-    { name: 'Соц. работа', value: 87, color: '#ef4444' },
-    { name: 'Педагогика', value: 76, color: '#84cc16' },
-    { name: 'Лингвистика', value: 54, color: '#ec4899' },
-  ];
+  const { specializationData, monthlyData, budgetData, studyFormData, loading, error } = useChartsData();
 
-  const monthlyData = [
-    { month: 'Янв', applications: 65, approved: 45 },
-    { month: 'Фев', applications: 89, approved: 67 },
-    { month: 'Мар', applications: 134, approved: 98 },
-    { month: 'Апр', applications: 167, approved: 124 },
-    { month: 'Май', applications: 198, approved: 145 },
-    { month: 'Июн', applications: 245, approved: 189 },
-    { month: 'Июл', applications: 312, approved: 234 },
-  ];
+  if (loading) {
+    return (
+      <div className="grid gap-6 md:grid-cols-2">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Card key={index} className={index === 0 ? "col-span-2" : ""}>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-64 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
-  const budgetData = [
-    { name: 'Бюджет', value: 654, color: '#10b981' },
-    { name: 'Платно', value: 593, color: '#f59e0b' },
-  ];
-
-  const studyFormData = [
-    { name: 'Очная', value: 789, color: '#3b82f6' },
-    { name: 'Заочная', value: 312, color: '#8b5cf6' },
-    { name: 'Очно-заочная', value: 146, color: '#06b6d4' },
-  ];
-
-  const COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#84cc16', '#ec4899'];
+  if (error) {
+    return (
+      <div className="p-4 text-center text-red-600">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
