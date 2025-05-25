@@ -1,12 +1,57 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import ApplicantForm from '@/components/ApplicantForm';
+import LoginForm from '@/components/LoginForm';
+import AdminDashboard from '@/pages/AdminDashboard';
+import { Button } from '@/components/ui/button';
+import { Shield, Users, GraduationCap } from 'lucide-react';
 
 const Index = () => {
+  const [currentView, setCurrentView] = useState<'form' | 'login' | 'admin'>('form');
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  const handleLogin = (role: string) => {
+    setUserRole(role);
+    setCurrentView('admin');
+  };
+
+  const handleLogout = () => {
+    setUserRole(null);
+    setCurrentView('form');
+  };
+
+  if (currentView === 'admin' && userRole) {
+    return <AdminDashboard />;
+  }
+
+  if (currentView === 'login') {
+    return <LoginForm onLogin={handleLogin} />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="relative">
+      {/* Навигационная панель */}
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <Button
+          variant="outline"
+          className="bg-white/90 backdrop-blur-sm border-blue-200 hover:bg-blue-50"
+          onClick={() => setCurrentView('form')}
+        >
+          <Users className="h-4 w-4 mr-2" />
+          Подача заявки
+        </Button>
+        <Button
+          variant="outline"
+          className="bg-white/90 backdrop-blur-sm border-blue-200 hover:bg-blue-50"
+          onClick={() => setCurrentView('login')}
+        >
+          <Shield className="h-4 w-4 mr-2" />
+          Админ панель
+        </Button>
       </div>
+
+      {/* Основная форма */}
+      <ApplicantForm />
     </div>
   );
 };
