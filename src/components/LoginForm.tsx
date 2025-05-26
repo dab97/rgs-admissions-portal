@@ -94,8 +94,6 @@ const LoginForm = ({ onLogin }: { onLogin: (role: string) => void }) => {
             <div className="pt-4 border-t border-gray-200">
               <div className="text-sm text-gray-600 space-y-2">
                 <p className="font-medium">Тестовые учетные записи:</p>
-                <div className="bg-gray-50 p-3 rounded-lg space-y-1">
-                </div>
               </div>
             </div>
           </CardContent>
