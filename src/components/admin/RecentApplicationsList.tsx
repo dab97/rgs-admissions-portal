@@ -22,6 +22,35 @@ const RecentApplicationsList = () => {
     return `${diffInDays} дней назад`;
   };
 
+  const getStatusBadge = (status: string | null) => {
+    switch (status) {
+      case 'approved':
+        return (
+          <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+            Одобрено
+          </Badge>
+        );
+      case 'rejected':
+        return (
+          <Badge className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
+            Отклонено
+          </Badge>
+        );
+      case 'under_review':
+        return (
+          <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+            На рассмотрении
+          </Badge>
+        );
+      default:
+        return (
+          <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
+            Ожидает
+          </Badge>
+        );
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -58,19 +87,14 @@ const RecentApplicationsList = () => {
                   <div className="flex-1">
                     <h4 className="font-semibold">{applicant.full_name}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {applicant.specializations.length > 0 
+                      {applicant.specializations && applicant.specializations.length > 0 
                         ? applicant.specializations.join(', ')
                         : 'Специализация не указана'
                       }
                     </p>
                   </div>
                   <div className="text-right">
-                    <Badge 
-                      variant="secondary"
-                      className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
-                    >
-                      На рассмотрении
-                    </Badge>
+                    {getStatusBadge(applicant.status)}
                     <p className="text-xs text-muted-foreground mt-1">
                       {formatTimeAgo(applicant.created_at)}
                     </p>

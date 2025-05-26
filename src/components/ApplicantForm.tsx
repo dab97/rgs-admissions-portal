@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { UserPlus, Phone, Mail, GraduationCap, Loader2 } from 'lucide-react';
+import { UserPlus, Phone, Mail, GraduationCap, Loader2, Search } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useApplicantData } from '@/hooks/useApplicantData';
 import { useApplicantSubmit } from '@/hooks/useApplicantSubmit';
 import { APP_CONSTANTS, ApplicantFormData } from '@/constants';
@@ -16,6 +18,7 @@ import { APP_CONSTANTS, ApplicantFormData } from '@/constants';
 const ApplicantForm = () => {
   const { responsiblePersons, specializations, loading, error } = useApplicantData();
   const { submitApplicant, isSubmitting } = useApplicantSubmit();
+  const [responsibleOpen, setResponsibleOpen] = useState(false);
 
   const [formData, setFormData] = useState<ApplicantFormData>({
     responsible_id: '',
@@ -100,6 +103,8 @@ const ApplicantForm = () => {
     );
   }
 
+  const selectedResponsible = responsiblePersons.find(person => person.id === formData.responsible_id);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-4xl mx-auto">
@@ -120,22 +125,45 @@ const ApplicantForm = () => {
           
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Ответственный */}
+              {/* Ответственный с поиском */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="responsible">Ответственный *</Label>
-                  <Select onValueChange={(value) => setFormData(prev => ({ ...prev, responsible_id: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите ответственного" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {responsiblePersons.map((person) => (
-                        <SelectItem key={person.id} value={person.id}>
-                          {person.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={responsibleOpen} onOpenChange={setResponsibleOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={responsibleOpen}
+                        className="w-full justify-between"
+                      >
+                        {selectedResponsible ? selectedResponsible.name : "Выберите ответственного..."}
+                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Поиск ответственного..." />
+                        <CommandList>
+                          <CommandEmpty>Ответственный не найден.</CommandEmpty>
+                          <CommandGroup>
+                            {responsiblePersons.map((person) => (
+                              <CommandItem
+                                key={person.id}
+                                value={person.name}
+                                onSelect={() => {
+                                  setFormData(prev => ({ ...prev, responsible_id: person.id }));
+                                  setResponsibleOpen(false);
+                                }}
+                              >
+                                {person.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* ФИО Поступающего */}
@@ -316,7 +344,7 @@ const ApplicantForm = () => {
                 </div>
               </div>
 
-              {/* Инвалидность и документ */}
+              {/* Инвалидность и документ об образовании */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <Label>Инвалидность</Label>
@@ -335,11 +363,18 @@ const ApplicantForm = () => {
 
                 <div className="space-y-2">
                   <Label>Документ об образовании</Label>
-                  <Input
-                    placeholder="Аттестат, диплом и т.д."
-                    value={formData.education_document}
-                    onChange={(e) => setFormData(prev => ({ ...prev, education_document: e.target.value }))}
-                  />
+                  <Select onValueChange={(value) => setFormData(prev => ({ ...prev, education_document: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Выберите документ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {APP_CONSTANTS.EDUCATION_DOCUMENTS.map((doc) => (
+                        <SelectItem key={doc.value} value={doc.value}>
+                          {doc.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -367,12 +402,18 @@ const ApplicantForm = () => {
               {/* Откуда узнали */}
               <div className="space-y-2">
                 <Label>Откуда узнали о нас?</Label>
-                <Textarea
-                  placeholder="Социальные сети, друзья, реклама и т.д."
-                  value={formData.how_did_you_know}
-                  onChange={(e) => setFormData(prev => ({ ...prev, how_did_you_know: e.target.value }))}
-                  className="min-h-[80px]"
-                />
+                <Select onValueChange={(value) => setFormData(prev => ({ ...prev, how_did_you_know: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите источник" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {APP_CONSTANTS.HOW_DID_YOU_KNOW_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <Button 

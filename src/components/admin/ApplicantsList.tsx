@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useApplicants, Applicant } from '@/hooks/useApplicants';
+import { useApplicantData } from '@/hooks/useApplicantData';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -11,12 +12,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { APP_CONSTANTS } from '@/constants';
 
 const ApplicantsList = () => {
   const { applicants, loading, updateApplicant, deleteApplicant } = useApplicants();
+  const { responsiblePersons, specializations } = useApplicantData();
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
   const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -35,14 +39,42 @@ const ApplicantsList = () => {
     }
   };
 
+  const getEducationDocumentLabel = (value: string | null) => {
+    const doc = APP_CONSTANTS.EDUCATION_DOCUMENTS.find(d => d.value === value);
+    return doc ? doc.label : value || 'Не указан';
+  };
+
+  const getHowDidYouKnowLabel = (value: string | null) => {
+    const option = APP_CONSTANTS.HOW_DID_YOU_KNOW_OPTIONS.find(o => o.value === value);
+    return option ? option.label : value || 'Не указано';
+  };
+
   const handleEdit = (applicant: Applicant) => {
-    setEditingApplicant(applicant);
+    setEditingApplicant({
+      ...applicant,
+      specialization_ids: applicant.specializations || []
+    });
     setIsEditDialogOpen(true);
   };
 
   const handleView = (applicant: Applicant) => {
     setSelectedApplicant(applicant);
     setIsViewDialogOpen(true);
+  };
+
+  const handleSpecializationChange = (specializationId: string, checked: boolean) => {
+    if (!editingApplicant) return;
+    
+    const currentIds = Array.isArray(editingApplicant.specialization_ids) 
+      ? editingApplicant.specialization_ids 
+      : [];
+    
+    setEditingApplicant({
+      ...editingApplicant,
+      specialization_ids: checked 
+        ? [...currentIds, specializationId]
+        : currentIds.filter(id => id !== specializationId)
+    });
   };
 
   const handleSave = async () => {
@@ -54,6 +86,20 @@ const ApplicantsList = () => {
       full_name: editingApplicant.full_name,
       phone: editingApplicant.phone,
       email: editingApplicant.email,
+      responsible_id: editingApplicant.responsible_id,
+      study_form: editingApplicant.study_form,
+      education_type: editingApplicant.education_type,
+      budget: editingApplicant.budget,
+      stream: editingApplicant.stream,
+      gender: editingApplicant.gender,
+      citizenship: editingApplicant.citizenship,
+      is_adult: editingApplicant.is_adult,
+      disability: editingApplicant.disability,
+      education_document: editingApplicant.education_document,
+      contact_person_name: editingApplicant.contact_person_name,
+      contact_person_phone: editingApplicant.contact_person_phone,
+      how_did_you_know: editingApplicant.how_did_you_know,
+      specialization_ids: editingApplicant.specialization_ids
     });
 
     setIsEditDialogOpen(false);
@@ -121,7 +167,7 @@ const ApplicantsList = () => {
                       <TableCell>{applicant.phone}</TableCell>
                       <TableCell>
                         <div className="max-w-xs truncate">
-                          {applicant.specializations.join(', ') || 'Не указано'}
+                          {applicant.specializations?.join(', ') || 'Не указано'}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -186,12 +232,12 @@ const ApplicantsList = () => {
 
       {/* Диалог просмотра */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Детали заявки</DialogTitle>
           </DialogHeader>
           {selectedApplicant && (
-            <div className="grid gap-4">
+            <div className="grid gap-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>ФИО</Label>
@@ -214,15 +260,76 @@ const ApplicantsList = () => {
                     }
                   </div>
                 </div>
+                <div>
+                  <Label>Гражданство</Label>
+                  <div className="mt-1 text-sm">{selectedApplicant.citizenship || 'Не указано'}</div>
+                </div>
+                <div>
+                  <Label>Форма обучения</Label>
+                  <div className="mt-1 text-sm">
+                    {APP_CONSTANTS.STUDY_FORMS.find(f => f.value === selectedApplicant.study_form)?.label || selectedApplicant.study_form}
+                  </div>
+                </div>
+                <div>
+                  <Label>Вид образования</Label>
+                  <div className="mt-1 text-sm">
+                    {APP_CONSTANTS.EDUCATION_TYPES.find(t => t.value === selectedApplicant.education_type)?.label || selectedApplicant.education_type}
+                  </div>
+                </div>
+                <div>
+                  <Label>Бюджет</Label>
+                  <div className="mt-1 text-sm">{selectedApplicant.budget ? 'Да' : 'Нет'}</div>
+                </div>
+                <div>
+                  <Label>Поток</Label>
+                  <div className="mt-1 text-sm">{selectedApplicant.stream || 'Не указан'}</div>
+                </div>
+                <div>
+                  <Label>Совершеннолетний</Label>
+                  <div className="mt-1 text-sm">
+                    {selectedApplicant.is_adult !== null ? (selectedApplicant.is_adult ? 'Да' : 'Нет') : 'Не указано'}
+                  </div>
+                </div>
+                <div>
+                  <Label>Инвалидность</Label>
+                  <div className="mt-1 text-sm">
+                    {selectedApplicant.disability !== null ? (selectedApplicant.disability ? 'Да' : 'Нет') : 'Не указано'}
+                  </div>
+                </div>
+                <div>
+                  <Label>Документ об образовании</Label>
+                  <div className="mt-1 text-sm">{getEducationDocumentLabel(selectedApplicant.education_document)}</div>
+                </div>
               </div>
+              
               <div>
                 <Label>Специализации</Label>
-                <div className="mt-1 text-sm">{selectedApplicant.specializations.join(', ') || 'Не указано'}</div>
+                <div className="mt-1 text-sm">{selectedApplicant.specializations?.join(', ') || 'Не указано'}</div>
               </div>
+
+              {(selectedApplicant.contact_person_name || selectedApplicant.contact_person_phone) && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Контактное лицо</Label>
+                    <div className="mt-1 text-sm">{selectedApplicant.contact_person_name || 'Не указано'}</div>
+                  </div>
+                  <div>
+                    <Label>Телефон контактного лица</Label>
+                    <div className="mt-1 text-sm">{selectedApplicant.contact_person_phone || 'Не указан'}</div>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <Label>Откуда узнали о нас</Label>
+                <div className="mt-1 text-sm">{getHowDidYouKnowLabel(selectedApplicant.how_did_you_know)}</div>
+              </div>
+
               <div>
                 <Label>Статус</Label>
                 <div className="mt-1">{getStatusBadge(selectedApplicant.status)}</div>
               </div>
+              
               {selectedApplicant.admin_notes && (
                 <div>
                   <Label>Заметки администратора</Label>
@@ -236,17 +343,18 @@ const ApplicantsList = () => {
 
       {/* Диалог редактирования */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Редактировать заявку</DialogTitle>
           </DialogHeader>
           {editingApplicant && (
-            <div className="grid gap-4">
+            <div className="grid gap-6">
+              {/* Основная информация */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="full_name">ФИО</Label>
+                  <Label htmlFor="edit_full_name">ФИО</Label>
                   <Input
-                    id="full_name"
+                    id="edit_full_name"
                     value={editingApplicant.full_name}
                     onChange={(e) => setEditingApplicant({
                       ...editingApplicant,
@@ -255,9 +363,9 @@ const ApplicantsList = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="phone">Телефон</Label>
+                  <Label htmlFor="edit_phone">Телефон</Label>
                   <Input
-                    id="phone"
+                    id="edit_phone"
                     value={editingApplicant.phone}
                     onChange={(e) => setEditingApplicant({
                       ...editingApplicant,
@@ -266,20 +374,261 @@ const ApplicantsList = () => {
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={editingApplicant.email || ''}
-                  onChange={(e) => setEditingApplicant({
-                    ...editingApplicant,
-                    email: e.target.value
-                  })}
-                />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit_email">Email</Label>
+                  <Input
+                    id="edit_email"
+                    type="email"
+                    value={editingApplicant.email || ''}
+                    onChange={(e) => setEditingApplicant({
+                      ...editingApplicant,
+                      email: e.target.value
+                    })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_citizenship">Гражданство</Label>
+                  <Input
+                    id="edit_citizenship"
+                    value={editingApplicant.citizenship || ''}
+                    onChange={(e) => setEditingApplicant({
+                      ...editingApplicant,
+                      citizenship: e.target.value
+                    })}
+                  />
+                </div>
               </div>
+
+              {/* Ответственный */}
               <div>
-                <Label htmlFor="status">Статус</Label>
+                <Label htmlFor="edit_responsible">Ответственный</Label>
+                <Select
+                  value={editingApplicant.responsible_id}
+                  onValueChange={(value) => setEditingApplicant({
+                    ...editingApplicant,
+                    responsible_id: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {responsiblePersons.map((person) => (
+                      <SelectItem key={person.id} value={person.id}>
+                        {person.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Специализации */}
+              <div>
+                <Label>Специализации</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {specializations.map((spec) => (
+                    <div key={spec.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`edit_spec_${spec.id}`}
+                        checked={Array.isArray(editingApplicant.specialization_ids) && editingApplicant.specialization_ids.includes(spec.id)}
+                        onCheckedChange={(checked) => handleSpecializationChange(spec.id, checked as boolean)}
+                      />
+                      <Label htmlFor={`edit_spec_${spec.id}`} className="text-sm">
+                        {spec.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Форма обучения и образование */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Форма обучения</Label>
+                  <Select
+                    value={editingApplicant.study_form}
+                    onValueChange={(value) => setEditingApplicant({
+                      ...editingApplicant,
+                      study_form: value
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {APP_CONSTANTS.STUDY_FORMS.map((form) => (
+                        <SelectItem key={form.value} value={form.value}>
+                          {form.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Вид образования</Label>
+                  <Select
+                    value={editingApplicant.education_type}
+                    onValueChange={(value) => setEditingApplicant({
+                      ...editingApplicant,
+                      education_type: value
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {APP_CONSTANTS.EDUCATION_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Дополнительные поля */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Бюджет</Label>
+                  <RadioGroup 
+                    value={editingApplicant.budget.toString()}
+                    onValueChange={(value) => setEditingApplicant({
+                      ...editingApplicant,
+                      budget: value === 'true'
+                    })}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="true" id="edit_budget_yes" />
+                      <Label htmlFor="edit_budget_yes">Да</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="false" id="edit_budget_no" />
+                      <Label htmlFor="edit_budget_no">Нет</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                <div>
+                  <Label>Пол</Label>
+                  <Select
+                    value={editingApplicant.gender || ''}
+                    onValueChange={(value) => setEditingApplicant({
+                      ...editingApplicant,
+                      gender: value
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Выберите пол" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {APP_CONSTANTS.GENDERS.map((gender) => (
+                        <SelectItem key={gender.value} value={gender.value}>
+                          {gender.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Поток</Label>
+                  <Select
+                    value={editingApplicant.stream?.toString() || ''}
+                    onValueChange={(value) => setEditingApplicant({
+                      ...editingApplicant,
+                      stream: value ? parseInt(value) : null
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Выберите поток" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {APP_CONSTANTS.STREAMS.map((stream) => (
+                        <SelectItem key={stream.value} value={stream.value.toString()}>
+                          {stream.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Документ об образовании */}
+              <div>
+                <Label>Документ об образовании</Label>
+                <Select
+                  value={editingApplicant.education_document || ''}
+                  onValueChange={(value) => setEditingApplicant({
+                    ...editingApplicant,
+                    education_document: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите документ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {APP_CONSTANTS.EDUCATION_DOCUMENTS.map((doc) => (
+                      <SelectItem key={doc.value} value={doc.value}>
+                        {doc.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Контактные лица */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit_contact_name">Контактное лицо</Label>
+                  <Input
+                    id="edit_contact_name"
+                    value={editingApplicant.contact_person_name || ''}
+                    onChange={(e) => setEditingApplicant({
+                      ...editingApplicant,
+                      contact_person_name: e.target.value
+                    })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_contact_phone">Телефон контактного лица</Label>
+                  <Input
+                    id="edit_contact_phone"
+                    value={editingApplicant.contact_person_phone || ''}
+                    onChange={(e) => setEditingApplicant({
+                      ...editingApplicant,
+                      contact_person_phone: e.target.value
+                    })}
+                  />
+                </div>
+              </div>
+
+              {/* Откуда узнали */}
+              <div>
+                <Label>Откуда узнали о нас</Label>
+                <Select
+                  value={editingApplicant.how_did_you_know || ''}
+                  onValueChange={(value) => setEditingApplicant({
+                    ...editingApplicant,
+                    how_did_you_know: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите источник" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {APP_CONSTANTS.HOW_DID_YOU_KNOW_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Статус */}
+              <div>
+                <Label htmlFor="edit_status">Статус</Label>
                 <Select
                   value={editingApplicant.status || 'pending'}
                   onValueChange={(value) => setEditingApplicant({
@@ -298,10 +647,12 @@ const ApplicantsList = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Заметки администратора */}
               <div>
-                <Label htmlFor="admin_notes">Заметки администратора</Label>
+                <Label htmlFor="edit_admin_notes">Заметки администратора</Label>
                 <Textarea
-                  id="admin_notes"
+                  id="edit_admin_notes"
                   value={editingApplicant.admin_notes || ''}
                   onChange={(e) => setEditingApplicant({
                     ...editingApplicant,
@@ -310,6 +661,7 @@ const ApplicantsList = () => {
                   placeholder="Добавьте заметки..."
                 />
               </div>
+
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                   Отмена

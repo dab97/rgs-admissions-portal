@@ -32,6 +32,29 @@ export const APP_CONSTANTS = {
     { value: false, label: 'Нет' }
   ],
 
+  // Документы об образовании
+  EDUCATION_DOCUMENTS: [
+    { value: 'secondary_certificate', label: 'Аттестат об общем среднем образовании' },
+    { value: 'secondary_certificate_excellence', label: 'Аттестат об общем среднем образовании с отличием' },
+    { value: 'vocational_diploma', label: 'Диплом о среднем специальном образовании (СПО)' },
+    { value: 'vocational_diploma_excellence', label: 'Диплом о среднем специальном образовании (СПО) с отличием' },
+    { value: 'technical_diploma', label: 'Диплом о профессионально-техническом образовании (НПО)' },
+    { value: 'technical_diploma_excellence', label: 'Диплом о профессионально-техническом образовании (НПО) с отличием' },
+    { value: 'higher_diploma', label: 'Диплом о высшем образовании (ВО)' },
+    { value: 'higher_diploma_excellence', label: 'Диплом о высшем образовании (ВО) с отличием' }
+  ],
+
+  // Источники информации
+  HOW_DID_YOU_KNOW_OPTIONS: [
+    { value: 'internet', label: 'Интернет' },
+    { value: 'social_media', label: 'Социальные сети' },
+    { value: 'friends_recommendation', label: 'Рекомендация друзей' },
+    { value: 'education_exhibition', label: 'Образовательная выставка' },
+    { value: 'advertising', label: 'Реклама' },
+    { value: 'media', label: 'СМИ' },
+    { value: 'other', label: 'Другое' }
+  ],
+
   // Роли пользователей
   USER_ROLES: {
     ADMIN: 'admin',

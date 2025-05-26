@@ -24,8 +24,10 @@ export interface Applicant {
   admin_notes: string | null;
   created_at: string;
   updated_at: string;
+  responsible_id: string;
   responsible_persons: { name: string } | null;
   specializations: string[];
+  specialization_ids?: string[];
 }
 
 export const useApplicants = () => {
@@ -42,7 +44,7 @@ export const useApplicants = () => {
           *,
           responsible_persons (name),
           applicant_specializations (
-            specializations (name)
+            specializations (id, name)
           )
         `)
         .order('created_at', { ascending: false });
@@ -53,6 +55,9 @@ export const useApplicants = () => {
         ...applicant,
         specializations: applicant.applicant_specializations?.map((as: any) => 
           as.specializations?.name
+        ).filter(Boolean) || [],
+        specialization_ids: applicant.applicant_specializations?.map((as: any) => 
+          as.specializations?.id
         ).filter(Boolean) || []
       })) || [];
 
@@ -67,12 +72,40 @@ export const useApplicants = () => {
 
   const updateApplicant = async (id: string, updates: Partial<Applicant>) => {
     try {
-      const { error } = await supabase
+      const { specialization_ids, ...applicantUpdates } = updates;
+      
+      // Обновляем основную информацию о поступающем
+      const { error: updateError } = await supabase
         .from('applicants')
-        .update(updates)
+        .update(applicantUpdates)
         .eq('id', id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Если есть изменения в специализациях, обновляем их
+      if (specialization_ids !== undefined) {
+        // Удаляем старые связи
+        const { error: deleteError } = await supabase
+          .from('applicant_specializations')
+          .delete()
+          .eq('applicant_id', id);
+
+        if (deleteError) throw deleteError;
+
+        // Добавляем новые связи
+        if (specialization_ids.length > 0) {
+          const specializationInserts = specialization_ids.map(specId => ({
+            applicant_id: id,
+            specialization_id: specId
+          }));
+
+          const { error: insertError } = await supabase
+            .from('applicant_specializations')
+            .insert(specializationInserts);
+
+          if (insertError) throw insertError;
+        }
+      }
 
       toast({
         title: 'Успешно обновлено',
