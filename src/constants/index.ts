@@ -16,8 +16,11 @@ export const APP_CONSTANTS = {
 
   // Потоки
   STREAMS: [
-    { value: 1, label: '1 поток' },
-    { value: 2, label: '2 поток' }
+    { value: 1, label: 'Без испытаний' },
+    { value: 2, label: '1 поток 17 июля (11.00)' },
+    { value: 3, label: '1 поток 17 июля (14.00)' },
+    { value: 4, label: '2 поток 15 августа (11.00)' },
+    { value: 5, label: '2 поток 15 августа (14.00)' }
   ],
 
   // Пол
