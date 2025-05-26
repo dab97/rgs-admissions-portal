@@ -68,6 +68,7 @@ export type Database = {
       }
       applicants: {
         Row: {
+          admin_notes: string | null
           budget: boolean
           citizenship: string | null
           contact_person_name: string | null
@@ -84,11 +85,13 @@ export type Database = {
           is_adult: boolean | null
           phone: string
           responsible_id: string
+          status: string | null
           stream: number | null
           study_form: string
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
           budget: boolean
           citizenship?: string | null
           contact_person_name?: string | null
@@ -105,11 +108,13 @@ export type Database = {
           is_adult?: boolean | null
           phone: string
           responsible_id: string
+          status?: string | null
           stream?: number | null
           study_form: string
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
           budget?: boolean
           citizenship?: string | null
           contact_person_name?: string | null
@@ -126,6 +131,7 @@ export type Database = {
           is_adult?: boolean | null
           phone?: string
           responsible_id?: string
+          status?: string | null
           stream?: number | null
           study_form?: string
           updated_at?: string
@@ -175,6 +181,47 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
