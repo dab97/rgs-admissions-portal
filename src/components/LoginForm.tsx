@@ -95,8 +95,6 @@ const LoginForm = ({ onLogin }: { onLogin: (role: string) => void }) => {
               <div className="text-sm text-gray-600 space-y-2">
                 <p className="font-medium">Тестовые учетные записи:</p>
                 <div className="bg-gray-50 p-3 rounded-lg space-y-1">
-                  <p><strong>Админ:</strong> admin / admin123</p>
-                  <p><strong>Модератор:</strong> moderator / mod123</p>
                 </div>
               </div>
             </div>
