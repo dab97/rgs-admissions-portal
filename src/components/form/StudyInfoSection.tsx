@@ -76,25 +76,7 @@ const StudyInfoSection = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="space-y-3">
-        <Label>Форма обучения *</Label>
-        {selectedSpecializationIds.length === 0 && (
-          <p className="text-sm text-gray-500">Сначала выберите специализацию</p>
-        )}
-        <RadioGroup 
-          value={studyForm}
-          onValueChange={onStudyFormChange}
-        >
-          {availableStudyForms.map((form) => (
-            <div key={form.value} className="flex items-center space-x-2">
-              <RadioGroupItem value={form.value} id={form.value} />
-              <Label htmlFor={form.value}>{form.label}</Label>
-            </div>
-          ))}
-        </RadioGroup>
-      </div>
-
-      <div className="space-y-3">
+            <div className="space-y-3">
         <Label>Вид образования *</Label>
         <RadioGroup 
           value={educationType}
@@ -123,6 +105,25 @@ const StudyInfoSection = ({
           ))}
         </RadioGroup>
       </div>
+
+      <div className="space-y-3">
+        <Label>Форма обучения *</Label>
+        {selectedSpecializationIds.length === 0 && (
+          <p className="text-sm text-gray-500">Сначала выберите специализацию</p>
+        )}
+        <RadioGroup 
+          value={studyForm}
+          onValueChange={onStudyFormChange}
+        >
+          {availableStudyForms.map((form) => (
+            <div key={form.value} className="flex items-center space-x-2">
+              <RadioGroupItem value={form.value} id={form.value} />
+              <Label htmlFor={form.value}>{form.label}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+      
     </div>
   );
 };
