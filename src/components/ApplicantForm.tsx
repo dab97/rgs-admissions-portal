@@ -167,8 +167,8 @@ const ApplicantForm = () => {
                 studyForm={formData.study_form}
                 budget={formData.budget}
                 specializations={specializations}
-                educationType={formData.education_type}
                 selectedSpecializationIds={formData.specialization_ids}
+                educationType={formData.education_type}
                 onStudyFormChange={(value) => setFormData(prev => ({ ...prev, study_form: value }))}
                 onEducationTypeChange={(value) => setFormData(prev => ({ 
                   ...prev, 
