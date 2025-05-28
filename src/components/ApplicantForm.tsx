@@ -1,24 +1,20 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Textarea } from '@/components/ui/textarea';
-import { UserPlus, Phone, Mail, GraduationCap, Loader2, Search } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { GraduationCap, Loader2 } from 'lucide-react';
 import { useApplicantData } from '@/hooks/useApplicantData';
 import { useApplicantSubmit } from '@/hooks/useApplicantSubmit';
 import { APP_CONSTANTS, ApplicantFormData } from '@/constants';
+import ResponsiblePersonSection from './form/ResponsiblePersonSection';
+import ContactInfoSection from './form/ContactInfoSection';
+import SpecializationsSection from './form/SpecializationsSection';
+import StudyInfoSection from './form/StudyInfoSection';
+import AdditionalDetailsSection from './form/AdditionalDetailsSection';
 
 const ApplicantForm = () => {
   const { responsiblePersons, specializations, loading, error } = useApplicantData();
   const { submitApplicant, isSubmitting } = useApplicantSubmit();
-  const [responsibleOpen, setResponsibleOpen] = useState(false);
 
   const [formData, setFormData] = useState<ApplicantFormData>({
     responsible_id: '',
@@ -103,8 +99,6 @@ const ApplicantForm = () => {
     );
   }
 
-  const selectedResponsible = responsiblePersons.find(person => person.id === formData.responsible_id);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-4xl mx-auto">
@@ -125,296 +119,62 @@ const ApplicantForm = () => {
           
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Ответственный с поиском */}
+              {/* Ответственный и контактная информация */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="responsible">Ответственный *</Label>
-                  <Popover open={responsibleOpen} onOpenChange={setResponsibleOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={responsibleOpen}
-                        className="w-full justify-between"
-                      >
-                        {selectedResponsible ? selectedResponsible.name : "Выберите ответственного..."}
-                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="Поиск ответственного..." />
-                        <CommandList>
-                          <CommandEmpty>Ответственный не найден.</CommandEmpty>
-                          <CommandGroup>
-                            {responsiblePersons.map((person) => (
-                              <CommandItem
-                                key={person.id}
-                                value={person.name}
-                                onSelect={() => {
-                                  setFormData(prev => ({ ...prev, responsible_id: person.id }));
-                                  setResponsibleOpen(false);
-                                }}
-                              >
-                                {person.name}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* ФИО Поступающего */}
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Фамилия Имя Отчество *</Label>
-                  <div className="relative">
-                    <UserPlus className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="fullName"
-                      placeholder="Введите ФИО"
-                      className="pl-10"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                      required
-                    />
-                  </div>
-                </div>
+                <ResponsiblePersonSection
+                  selectedResponsibleId={formData.responsible_id}
+                  responsiblePersons={responsiblePersons}
+                  onResponsibleChange={(id) => setFormData(prev => ({ ...prev, responsible_id: id }))}
+                />
               </div>
 
-              {/* Контактная информация */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Номер телефона *</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="phone"
-                      placeholder="+375 (29) 123-45-67"
-                      className="pl-10"
-                      value={formData.phone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="example@mail.com"
-                      className="pl-10"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    />
-                  </div>
-                </div>
-              </div>
+              <ContactInfoSection
+                fullName={formData.full_name}
+                phone={formData.phone}
+                email={formData.email}
+                onFullNameChange={(value) => setFormData(prev => ({ ...prev, full_name: value }))}
+                onPhoneChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
+                onEmailChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
+              />
 
               {/* Направления подготовки */}
-              <div className="space-y-3">
-                <Label>Направления подготовки *</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {specializations.map((specialization) => (
-                    <div key={specialization.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={specialization.id}
-                        checked={formData.specialization_ids.includes(specialization.id)}
-                        onCheckedChange={(checked) => 
-                          handleSpecializationChange(specialization.id, checked as boolean)
-                        }
-                      />
-                      <Label htmlFor={specialization.id} className="text-sm">
-                        {specialization.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <SpecializationsSection
+                specializations={specializations}
+                selectedSpecializationIds={formData.specialization_ids}
+                onSpecializationChange={handleSpecializationChange}
+              />
 
-              {/* Форма обучения и тип образования */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-3">
-                  <Label>Форма обучения *</Label>
-                  <RadioGroup 
-                    value={formData.study_form}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, study_form: value }))}
-                  >
-                    {APP_CONSTANTS.STUDY_FORMS.map((form) => (
-                      <div key={form.value} className="flex items-center space-x-2">
-                        <RadioGroupItem value={form.value} id={form.value} />
-                        <Label htmlFor={form.value}>{form.label}</Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-
-                <div className="space-y-3">
-                  <Label>Вид образования *</Label>
-                  <RadioGroup 
-                    value={formData.education_type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, education_type: value }))}
-                  >
-                    {APP_CONSTANTS.EDUCATION_TYPES.map((type) => (
-                      <div key={type.value} className="flex items-center space-x-2">
-                        <RadioGroupItem value={type.value} id={type.value} />
-                        <Label htmlFor={type.value}>{type.label}</Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-
-                <div className="space-y-3">
-                  <Label>Бюджет *</Label>
-                  <RadioGroup 
-                    value={formData.budget.toString()}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, budget: value === 'true' }))}
-                  >
-                    {APP_CONSTANTS.YES_NO_OPTIONS.map((option) => (
-                      <div key={option.value.toString()} className="flex items-center space-x-2">
-                        <RadioGroupItem value={option.value.toString()} id={`budget-${option.value}`} />
-                        <Label htmlFor={`budget-${option.value}`}>{option.label}</Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-              </div>
+              {/* Информация об обучении */}
+              <StudyInfoSection
+                studyForm={formData.study_form}
+                educationType={formData.education_type}
+                budget={formData.budget}
+                onStudyFormChange={(value) => setFormData(prev => ({ ...prev, study_form: value }))}
+                onEducationTypeChange={(value) => setFormData(prev => ({ ...prev, education_type: value }))}
+                onBudgetChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
+              />
 
               {/* Дополнительная информация */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="space-y-2">
-                  <Label>Поток</Label>
-                  <Select onValueChange={(value) => setFormData(prev => ({ ...prev, stream: parseInt(value) }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите поток" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {APP_CONSTANTS.STREAMS.map((stream) => (
-                        <SelectItem key={stream.value} value={stream.value.toString()}>
-                          {stream.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Пол</Label>
-                  <Select onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите пол" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {APP_CONSTANTS.GENDERS.map((gender) => (
-                        <SelectItem key={gender.value} value={gender.value}>
-                          {gender.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Гражданство</Label>
-                  <Input
-                    placeholder="Беларусь"
-                    value={formData.citizenship}
-                    onChange={(e) => setFormData(prev => ({ ...prev, citizenship: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <Label>Совершеннолетний</Label>
-                  <RadioGroup 
-                    value={formData.is_adult?.toString() || ''}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, is_adult: value === 'true' }))}
-                  >
-                    {APP_CONSTANTS.YES_NO_OPTIONS.map((option) => (
-                      <div key={option.value.toString()} className="flex items-center space-x-2">
-                        <RadioGroupItem value={option.value.toString()} id={`adult-${option.value}`} />
-                        <Label htmlFor={`adult-${option.value}`}>{option.label}</Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-              </div>
-
-              {/* Инвалидность и документ об образовании */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <Label>Инвалидность</Label>
-                  <RadioGroup 
-                    value={formData.disability?.toString() || ''}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, disability: value === 'true' }))}
-                  >
-                    {APP_CONSTANTS.YES_NO_OPTIONS.map((option) => (
-                      <div key={option.value.toString()} className="flex items-center space-x-2">
-                        <RadioGroupItem value={option.value.toString()} id={`disability-${option.value}`} />
-                        <Label htmlFor={`disability-${option.value}`}>{option.label}</Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Документ об образовании</Label>
-                  <Select onValueChange={(value) => setFormData(prev => ({ ...prev, education_document: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите документ" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {APP_CONSTANTS.EDUCATION_DOCUMENTS.map((doc) => (
-                        <SelectItem key={doc.value} value={doc.value}>
-                          {doc.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Контактное лицо */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label>Ф.И.О. Контактного лица</Label>
-                  <Input
-                    placeholder="Введите ФИО"
-                    value={formData.contact_person_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contact_person_name: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Телефон Контактного лица</Label>
-                  <Input
-                    placeholder="+375 (29) 123-45-67"
-                    value={formData.contact_person_phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contact_person_phone: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              {/* Откуда узнали */}
-              <div className="space-y-2">
-                <Label>Откуда узнали о нас?</Label>
-                <Select onValueChange={(value) => setFormData(prev => ({ ...prev, how_did_you_know: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите источник" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {APP_CONSTANTS.HOW_DID_YOU_KNOW_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <AdditionalDetailsSection
+                stream={formData.stream}
+                gender={formData.gender}
+                citizenship={formData.citizenship}
+                isAdult={formData.is_adult}
+                disability={formData.disability}
+                educationDocument={formData.education_document}
+                contactPersonName={formData.contact_person_name}
+                contactPersonPhone={formData.contact_person_phone}
+                howDidYouKnow={formData.how_did_you_know}
+                onStreamChange={(value) => setFormData(prev => ({ ...prev, stream: value }))}
+                onGenderChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
+                onCitizenshipChange={(value) => setFormData(prev => ({ ...prev, citizenship: value }))}
+                onIsAdultChange={(value) => setFormData(prev => ({ ...prev, is_adult: value }))}
+                onDisabilityChange={(value) => setFormData(prev => ({ ...prev, disability: value }))}
+                onEducationDocumentChange={(value) => setFormData(prev => ({ ...prev, education_document: value }))}
+                onContactPersonNameChange={(value) => setFormData(prev => ({ ...prev, contact_person_name: value }))}
+                onContactPersonPhoneChange={(value) => setFormData(prev => ({ ...prev, contact_person_phone: value }))}
+                onHowDidYouKnowChange={(value) => setFormData(prev => ({ ...prev, how_did_you_know: value }))}
+              />
 
               <Button 
                 type="submit" 
