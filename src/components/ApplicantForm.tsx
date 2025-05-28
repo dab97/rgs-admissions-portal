@@ -162,6 +162,14 @@ const ApplicantForm = () => {
                 onEmailChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
               />
 
+              {/* Направления подготовки */}
+              <SpecializationsSection
+                specializations={specializations}
+                selectedSpecializationIds={formData.specialization_ids}
+                educationType={formData.education_type}
+                onSpecializationChange={handleSpecializationChange}
+              />
+
               {/* Информация об обучении */}
               <StudyInfoSection
                 studyForm={formData.study_form}
@@ -177,14 +185,6 @@ const ApplicantForm = () => {
                   study_form: '' // Сбрасываем форму обучения
                 }))}
                 onBudgetChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
-              />
-
-              {/* Направления подготовки */}
-              <SpecializationsSection
-                specializations={specializations}
-                selectedSpecializationIds={formData.specialization_ids}
-                educationType={formData.education_type}
-                onSpecializationChange={handleSpecializationChange}
               />
 
               {/* Дополнительная информация */}
