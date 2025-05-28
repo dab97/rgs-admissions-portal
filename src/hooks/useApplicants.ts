@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -61,7 +60,10 @@ export const useApplicants = () => {
         ).filter(Boolean) || [],
         specialization_ids: applicant.applicant_specializations?.map((as: any) => 
           as.specializations?.id
-        ).filter(Boolean) || []
+        ).filter(Boolean) || [],
+        exam_type: applicant.exam_type || null,
+        exam_scores: applicant.exam_scores || null,
+        entrance_subjects: applicant.entrance_subjects || null
       })) || [];
 
       setApplicants(formattedApplicants);

@@ -51,6 +51,9 @@ const ApplicantsList = () => {
       contact_person_name: editingApplicant.contact_person_name,
       contact_person_phone: editingApplicant.contact_person_phone,
       how_did_you_know: editingApplicant.how_did_you_know,
+      exam_type: editingApplicant.exam_type,
+      exam_scores: editingApplicant.exam_scores,
+      entrance_subjects: editingApplicant.entrance_subjects,
       specialization_ids: editingApplicant.specialization_ids
     });
 

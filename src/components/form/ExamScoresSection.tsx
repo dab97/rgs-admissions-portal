@@ -32,15 +32,6 @@ const ExamScoresSection = ({
   onExamScoreChange,
   onEntranceSubjectsChange
 }: ExamScoresSectionProps) => {
-  // Определяем тип экзамена на основе гражданства
-  React.useEffect(() => {
-    if (citizenship === 'russia') {
-      onExamTypeChange('ege');
-    } else if (citizenship === 'belarus') {
-      onExamTypeChange('ct');
-    }
-  }, [citizenship, onExamTypeChange]);
-
   // Получаем доступные предметы для вступительных испытаний
   const getAvailableEntranceSubjects = () => {
     if (!budget) {
@@ -91,6 +82,18 @@ const ExamScoresSection = ({
     onEntranceSubjectsChange(updatedSubjects);
   };
 
+  const getMinScore = (subjectValue: string) => {
+    const minScores: { [key: string]: number } = {
+      'biology': 39,
+      'social_studies': 45,
+      'mathematics': 40,
+      'russian': 40,
+      'world_history': 36,
+      'foreign_language': 30
+    };
+    return minScores[subjectValue] || 0;
+  };
+
   if (!citizenship) {
     return (
       <div className="space-y-3">
@@ -113,28 +116,18 @@ const ExamScoresSection = ({
         <RadioGroup 
           value={examType}
           onValueChange={onExamTypeChange}
-          disabled={citizenship === 'russia' || citizenship === 'belarus'}
         >
-          {APP_CONSTANTS.EXAM_TYPES.map((type) => {
-            const isDisabled = (citizenship === 'russia' && type.value !== 'ege') ||
-                             (citizenship === 'belarus' && type.value !== 'ct');
-            
-            return (
-              <div key={type.value} className="flex items-center space-x-2">
-                <RadioGroupItem 
-                  value={type.value} 
-                  id={type.value}
-                  disabled={isDisabled}
-                />
-                <Label 
-                  htmlFor={type.value}
-                  className={isDisabled ? 'text-gray-400' : ''}
-                >
-                  {type.label}
-                </Label>
-              </div>
-            );
-          })}
+          {APP_CONSTANTS.EXAM_TYPES.map((type) => (
+            <div key={type.value} className="flex items-center space-x-2">
+              <RadioGroupItem 
+                value={type.value} 
+                id={type.value}
+              />
+              <Label htmlFor={type.value}>
+                {type.label}
+              </Label>
+            </div>
+          ))}
         </RadioGroup>
       </div>
 
@@ -142,30 +135,34 @@ const ExamScoresSection = ({
         <div className="space-y-4">
           <Label className="text-lg font-medium">Баллы по предметам ЦТ/ЦЭ</Label>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {APP_CONSTANTS.CT_SUBJECTS.map((subject) => (
-              <div key={subject.value} className="space-y-2">
-                <Label htmlFor={`score-${subject.value}`} className="text-sm">
-                  {subject.label}
-                </Label>
-                <Input
-                  id={`score-${subject.value}`}
-                  type="number"
-                  min="0"
-                  max="100"
-                  placeholder="0-100"
-                  value={examScores[subject.value as keyof ExamScores] || ''}
-                  onChange={(e) => {
-                    const score = parseInt(e.target.value);
-                    if (!isNaN(score) && score >= 0 && score <= 100) {
-                      onExamScoreChange(subject.value, score);
-                    } else if (e.target.value === '') {
-                      onExamScoreChange(subject.value, 0);
-                    }
-                  }}
-                  className="text-center"
-                />
-              </div>
-            ))}
+            {APP_CONSTANTS.CT_SUBJECTS.map((subject) => {
+              const minScore = getMinScore(subject.value);
+              return (
+                <div key={subject.value} className="space-y-2">
+                  <Label htmlFor={`score-${subject.value}`} className="text-sm">
+                    {subject.label} 
+                    <span className="text-gray-500 ml-1">(мин. {minScore})</span>
+                  </Label>
+                  <Input
+                    id={`score-${subject.value}`}
+                    type="number"
+                    min={minScore}
+                    max="100"
+                    placeholder={`${minScore}-100`}
+                    value={examScores[subject.value as keyof ExamScores] || ''}
+                    onChange={(e) => {
+                      const score = parseInt(e.target.value);
+                      if (!isNaN(score) && score >= minScore && score <= 100) {
+                        onExamScoreChange(subject.value, score);
+                      } else if (e.target.value === '') {
+                        onExamScoreChange(subject.value, 0);
+                      }
+                    }}
+                    className="text-center"
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
