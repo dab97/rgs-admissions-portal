@@ -172,9 +172,9 @@ const ApplicantForm = () => {
 
               {/* Информация об обучении */}
               <StudyInfoSection
-                studyForm={formData.study_form}
-                budget={formData.budget}
                 specializations={specializations}
+                budget={formData.budget}
+                studyForm={formData.study_form}
                 selectedSpecializationIds={formData.specialization_ids}
                 educationType={formData.education_type}
                 onStudyFormChange={(value) => setFormData(prev => ({ ...prev, study_form: value }))}
