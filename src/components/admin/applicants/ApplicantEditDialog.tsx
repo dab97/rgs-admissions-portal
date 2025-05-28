@@ -8,6 +8,7 @@ import BasicInfoSection from './sections/BasicInfoSection';
 import EducationSection from './sections/EducationSection';
 import AdditionalInfoSection from './sections/AdditionalInfoSection';
 import StatusSection from './sections/StatusSection';
+import ExamInfoSection from './sections/ExamInfoSection';
 
 interface ApplicantEditDialogProps {
   isOpen: boolean;
@@ -52,6 +53,12 @@ const ApplicantEditDialog = ({
           <AdditionalInfoSection
             applicant={applicant}
             onApplicantChange={onApplicantChange}
+          />
+
+          <ExamInfoSection
+            applicant={applicant}
+            onApplicantChange={onApplicantChange}
+            specializations={specializations}
           />
           
           <StatusSection

@@ -32,7 +32,10 @@ export const useApplicantSubmit = () => {
           education_document: formData.education_document || null,
           contact_person_name: formData.contact_person_name || null,
           contact_person_phone: formData.contact_person_phone || null,
-          how_did_you_know: formData.how_did_you_know || null
+          how_did_you_know: formData.how_did_you_know || null,
+          exam_type: formData.exam_type || null,
+          exam_scores: formData.exam_scores || null,
+          entrance_subjects: formData.entrance_subjects || null
         })
         .select()
         .single();

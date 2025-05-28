@@ -36,7 +36,8 @@ const ApplicantForm = () => {
     contact_person_phone: '',
     how_did_you_know: '',
     exam_type: '',
-    exam_scores: {}
+    exam_scores: {},
+    entrance_subjects: []
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,7 +72,8 @@ const ApplicantForm = () => {
         contact_person_phone: '',
         how_did_you_know: '',
         exam_type: '',
-        exam_scores: {}
+        exam_scores: {},
+        entrance_subjects: []
       });
     }
   };
@@ -94,6 +96,13 @@ const ApplicantForm = () => {
         ...prev.exam_scores,
         [subject]: score
       }
+    }));
+  };
+
+  const handleEntranceSubjectsChange = (subjects: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      entrance_subjects: subjects
     }));
   };
 
@@ -200,13 +209,18 @@ const ApplicantForm = () => {
                 onHowDidYouKnowChange={(value) => setFormData(prev => ({ ...prev, how_did_you_know: value }))}
               />
 
-              {/* ЕГЭ/ЦТ */}
+              {/* ЕГЭ/ЦТ/Вступительные испытания */}
               <ExamScoresSection
                 citizenship={formData.citizenship}
                 examType={formData.exam_type}
                 examScores={formData.exam_scores || {}}
+                budget={formData.budget}
+                selectedSpecializationIds={formData.specialization_ids}
+                specializations={specializations}
+                entranceSubjects={formData.entrance_subjects}
                 onExamTypeChange={(value) => setFormData(prev => ({ ...prev, exam_type: value }))}
                 onExamScoreChange={handleExamScoreChange}
+                onEntranceSubjectsChange={handleEntranceSubjectsChange}
               />
 
               <Button 

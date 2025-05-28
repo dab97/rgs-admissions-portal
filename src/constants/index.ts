@@ -59,7 +59,8 @@ export const APP_CONSTANTS = {
   // Типы экзаменов
   EXAM_TYPES: [
     { value: 'ege', label: 'ЕГЭ' },
-    { value: 'ct', label: 'ЦТ/ЦЭ' }
+    { value: 'ct', label: 'ЦТ/ЦЭ' },
+    { value: 'entrance', label: 'Вступительные испытания' }
   ],
 
   // Предметы для ЦТ/ЦЭ
@@ -71,6 +72,24 @@ export const APP_CONSTANTS = {
     { value: 'world_history', label: 'История Всемирная' },
     { value: 'foreign_language', label: 'Ин. язык' }
   ],
+
+  // Предметы для вступительных испытаний
+  ENTRANCE_SUBJECTS: [
+    { value: 'russian', label: 'Русский язык' },
+    { value: 'social_studies', label: 'Обществознание' },
+    { value: 'biology', label: 'Биология' },
+    { value: 'mathematics', label: 'Математика' },
+    { value: 'history', label: 'История' },
+    { value: 'foreign_language', label: 'Ин. язык' }
+  ],
+
+  // Предметы для вступительных испытаний по специализациям
+  ENTRANCE_SUBJECTS_BY_SPECIALIZATION: {
+    psychology: ['biology', 'social_studies', 'mathematics', 'russian'],
+    management: ['mathematics', 'social_studies', 'history', 'foreign_language', 'russian'],
+    social_work: ['history', 'social_studies', 'russian'],
+    law: ['social_studies', 'history', 'foreign_language', 'russian']
+  },
 
   // Варианты Да/Нет
   YES_NO_OPTIONS: [
@@ -151,6 +170,7 @@ export interface ExamScores {
   mathematics?: number;
   world_history?: number;
   foreign_language?: number;
+  history?: number;
 }
 
 export interface ApplicantFormData {
@@ -173,4 +193,5 @@ export interface ApplicantFormData {
   how_did_you_know?: string;
   exam_type?: string;
   exam_scores?: ExamScores;
+  entrance_subjects?: string[];
 }

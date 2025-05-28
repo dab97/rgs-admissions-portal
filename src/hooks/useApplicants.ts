@@ -20,6 +20,9 @@ export interface Applicant {
   contact_person_name: string | null;
   contact_person_phone: string | null;
   how_did_you_know: string | null;
+  exam_type: string | null;
+  exam_scores: any | null;
+  entrance_subjects: string[] | null;
   status: string | null;
   admin_notes: string | null;
   created_at: string;
