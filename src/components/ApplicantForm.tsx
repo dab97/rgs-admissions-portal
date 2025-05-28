@@ -11,6 +11,7 @@ import ContactInfoSection from './form/ContactInfoSection';
 import SpecializationsSection from './form/SpecializationsSection';
 import StudyInfoSection from './form/StudyInfoSection';
 import AdditionalDetailsSection from './form/AdditionalDetailsSection';
+import ExamScoresSection from './form/ExamScoresSection';
 
 const ApplicantForm = () => {
   const { responsiblePersons, specializations, loading, error } = useApplicantData();
@@ -33,7 +34,9 @@ const ApplicantForm = () => {
     education_document: '',
     contact_person_name: '',
     contact_person_phone: '',
-    how_did_you_know: ''
+    how_did_you_know: '',
+    exam_type: '',
+    exam_scores: {}
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,7 +69,9 @@ const ApplicantForm = () => {
         education_document: '',
         contact_person_name: '',
         contact_person_phone: '',
-        how_did_you_know: ''
+        how_did_you_know: '',
+        exam_type: '',
+        exam_scores: {}
       });
     }
   };
@@ -76,7 +81,19 @@ const ApplicantForm = () => {
       ...prev,
       specialization_ids: checked 
         ? [...prev.specialization_ids, specializationId]
-        : prev.specialization_ids.filter(id => id !== specializationId)
+        : prev.specialization_ids.filter(id => id !== specializationId),
+      // Сбрасываем форму обучения при изменении специализаций
+      study_form: ''
+    }));
+  };
+
+  const handleExamScoreChange = (subject: string, score: number) => {
+    setFormData(prev => ({
+      ...prev,
+      exam_scores: {
+        ...prev.exam_scores,
+        [subject]: score
+      }
     }));
   };
 
@@ -119,15 +136,14 @@ const ApplicantForm = () => {
           
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Ответственный и контактная информация */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ResponsiblePersonSection
-                  selectedResponsibleId={formData.responsible_id}
-                  responsiblePersons={responsiblePersons}
-                  onResponsibleChange={(id) => setFormData(prev => ({ ...prev, responsible_id: id }))}
-                />
-              </div>
+              {/* Ответственный */}
+              <ResponsiblePersonSection
+                selectedResponsibleId={formData.responsible_id}
+                responsiblePersons={responsiblePersons}
+                onResponsibleChange={(id) => setFormData(prev => ({ ...prev, responsible_id: id }))}
+              />
 
+              {/* Контактная информация */}
               <ContactInfoSection
                 fullName={formData.full_name}
                 phone={formData.phone}
@@ -137,21 +153,29 @@ const ApplicantForm = () => {
                 onEmailChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
               />
 
-              {/* Направления подготовки */}
-              <SpecializationsSection
-                specializations={specializations}
-                selectedSpecializationIds={formData.specialization_ids}
-                onSpecializationChange={handleSpecializationChange}
-              />
-
               {/* Информация об обучении */}
               <StudyInfoSection
                 studyForm={formData.study_form}
                 educationType={formData.education_type}
                 budget={formData.budget}
+                specializations={specializations}
+                selectedSpecializationIds={formData.specialization_ids}
                 onStudyFormChange={(value) => setFormData(prev => ({ ...prev, study_form: value }))}
-                onEducationTypeChange={(value) => setFormData(prev => ({ ...prev, education_type: value }))}
+                onEducationTypeChange={(value) => setFormData(prev => ({ 
+                  ...prev, 
+                  education_type: value,
+                  specialization_ids: [], // Сбрасываем специализации при смене типа образования
+                  study_form: '' // Сбрасываем форму обучения
+                }))}
                 onBudgetChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
+              />
+
+              {/* Направления подготовки */}
+              <SpecializationsSection
+                specializations={specializations}
+                selectedSpecializationIds={formData.specialization_ids}
+                educationType={formData.education_type}
+                onSpecializationChange={handleSpecializationChange}
               />
 
               {/* Дополнительная информация */}
@@ -174,6 +198,15 @@ const ApplicantForm = () => {
                 onContactPersonNameChange={(value) => setFormData(prev => ({ ...prev, contact_person_name: value }))}
                 onContactPersonPhoneChange={(value) => setFormData(prev => ({ ...prev, contact_person_phone: value }))}
                 onHowDidYouKnowChange={(value) => setFormData(prev => ({ ...prev, how_did_you_know: value }))}
+              />
+
+              {/* ЕГЭ/ЦТ */}
+              <ExamScoresSection
+                citizenship={formData.citizenship}
+                examType={formData.exam_type}
+                examScores={formData.exam_scores || {}}
+                onExamTypeChange={(value) => setFormData(prev => ({ ...prev, exam_type: value }))}
+                onExamScoreChange={handleExamScoreChange}
               />
 
               <Button 

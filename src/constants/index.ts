@@ -14,6 +14,26 @@ export const APP_CONSTANTS = {
     { value: 'master', label: 'Магистратура' }
   ],
 
+  // Специализации с ограничениями
+  SPECIALIZATIONS_CONFIG: {
+    bachelor: {
+      available: ['psychology', 'management', 'social_work', 'law'],
+      studyFormRestrictions: {
+        psychology: ['full-time', 'part-time'], // нет заочной
+        management: ['full-time'], // только очная
+        social_work: ['full-time', 'distance'], // очная и заочная
+        law: ['full-time'] // только очная
+      }
+    },
+    master: {
+      available: ['management', 'psychology'],
+      studyFormRestrictions: {
+        management: ['distance'], // только заочная
+        psychology: ['part-time'] // только очно-заочная
+      }
+    }
+  },
+
   // Потоки
   STREAMS: [
     { value: 1, label: 'Без испытаний' },
@@ -27,6 +47,29 @@ export const APP_CONSTANTS = {
   GENDERS: [
     { value: 'male', label: 'Мужской' },
     { value: 'female', label: 'Женский' }
+  ],
+
+  // Гражданство
+  CITIZENSHIPS: [
+    { value: 'russia', label: 'Российская Федерация' },
+    { value: 'belarus', label: 'Беларусь' },
+    { value: 'other', label: 'Другое' }
+  ],
+
+  // Типы экзаменов
+  EXAM_TYPES: [
+    { value: 'ege', label: 'ЕГЭ' },
+    { value: 'ct', label: 'ЦТ/ЦЭ' }
+  ],
+
+  // Предметы для ЦТ/ЦЭ
+  CT_SUBJECTS: [
+    { value: 'russian', label: 'Русский язык' },
+    { value: 'social_studies', label: 'Обществознание' },
+    { value: 'biology', label: 'Биология' },
+    { value: 'mathematics', label: 'Математика' },
+    { value: 'world_history', label: 'История Всемирная' },
+    { value: 'foreign_language', label: 'Ин. язык' }
   ],
 
   // Варианты Да/Нет
@@ -98,6 +141,16 @@ export interface ResponsiblePerson {
 export interface Specialization {
   id: string;
   name: string;
+  code?: string; // добавляем код для идентификации
+}
+
+export interface ExamScores {
+  russian?: number;
+  social_studies?: number;
+  biology?: number;
+  mathematics?: number;
+  world_history?: number;
+  foreign_language?: number;
 }
 
 export interface ApplicantFormData {
@@ -118,4 +171,6 @@ export interface ApplicantFormData {
   contact_person_name?: string;
   contact_person_phone?: string;
   how_did_you_know?: string;
+  exam_type?: string;
+  exam_scores?: ExamScores;
 }
