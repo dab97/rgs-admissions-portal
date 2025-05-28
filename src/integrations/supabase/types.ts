@@ -78,6 +78,9 @@ export type Database = {
           education_document: string | null
           education_type: string
           email: string | null
+          entrance_subjects: string[] | null
+          exam_scores: Json | null
+          exam_type: string | null
           full_name: string
           gender: string | null
           how_did_you_know: string | null
@@ -101,6 +104,9 @@ export type Database = {
           education_document?: string | null
           education_type: string
           email?: string | null
+          entrance_subjects?: string[] | null
+          exam_scores?: Json | null
+          exam_type?: string | null
           full_name: string
           gender?: string | null
           how_did_you_know?: string | null
@@ -124,6 +130,9 @@ export type Database = {
           education_document?: string | null
           education_type?: string
           email?: string | null
+          entrance_subjects?: string[] | null
+          exam_scores?: Json | null
+          exam_type?: string | null
           full_name?: string
           gender?: string | null
           how_did_you_know?: string | null
