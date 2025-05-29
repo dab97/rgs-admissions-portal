@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -48,6 +48,20 @@ const AdditionalDetailsSection = ({
   onContactPersonPhoneChange,
   onHowDidYouKnowChange
 }: AdditionalDetailsSectionProps) => {
+  const [showCustomCitizenship, setShowCustomCitizenship] = useState(
+    citizenship && !APP_CONSTANTS.CITIZENSHIPS.some(c => c.value === citizenship)
+  );
+
+  const handleCitizenshipSelectChange = (value: string) => {
+    if (value === 'custom') {
+      setShowCustomCitizenship(true);
+      onCitizenshipChange('');
+    } else {
+      setShowCustomCitizenship(false);
+      onCitizenshipChange(value);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-gray-900">Дополнительная информация</h3>
@@ -91,18 +105,39 @@ const AdditionalDetailsSection = ({
 
         <div className="space-y-2">
           <Label>Гражданство *</Label>
-          <Select value={citizenship} onValueChange={onCitizenshipChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Выберите гражданство" />
-            </SelectTrigger>
-            <SelectContent>
-              {APP_CONSTANTS.CITIZENSHIPS.map((citizenshipOption) => (
-                <SelectItem key={citizenshipOption.value} value={citizenshipOption.value}>
-                  {citizenshipOption.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {showCustomCitizenship ? (
+            <div className="space-y-2">
+              <Input
+                placeholder="Введите страну"
+                value={citizenship}
+                onChange={(e) => onCitizenshipChange(e.target.value)}
+              />
+              <button
+                type="button"
+                className="text-sm text-blue-600 hover:text-blue-700"
+                onClick={() => {
+                  setShowCustomCitizenship(false);
+                  onCitizenshipChange('');
+                }}
+              >
+                Выбрать из списка
+              </button>
+            </div>
+          ) : (
+            <Select value={citizenship} onValueChange={handleCitizenshipSelectChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите гражданство" />
+              </SelectTrigger>
+              <SelectContent>
+                {APP_CONSTANTS.CITIZENSHIPS.map((citizenshipOption) => (
+                  <SelectItem key={citizenshipOption.value} value={citizenshipOption.value}>
+                    {citizenshipOption.label}
+                  </SelectItem>
+                ))}
+                <SelectItem value="custom">Другое (ввести вручную)</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 

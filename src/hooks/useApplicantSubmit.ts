@@ -18,7 +18,7 @@ export const useApplicantSubmit = () => {
       const { data, error } = await supabase
         .from('applicants')
         .insert({
-          responsible_person_id: formData.responsible_id, // Changed from responsible_id
+          responsible_id: formData.responsible_id, // Fixed: use responsible_id instead of responsible_person_id
           full_name: formData.full_name,
           phone: formData.phone,
           email: formData.email,
@@ -35,7 +35,7 @@ export const useApplicantSubmit = () => {
           contact_person_phone: formData.contact_person_phone,
           how_did_you_know: formData.how_did_you_know,
           exam_type: formData.exam_type,
-          exam_scores: examScoresJson, // Now properly typed as JSON
+          exam_scores: examScoresJson,
           entrance_subjects: formData.entrance_subjects,
           status: 'pending'
         })
