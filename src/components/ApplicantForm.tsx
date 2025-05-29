@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,10 +7,10 @@ import { useApplicantSubmit } from '@/hooks/useApplicantSubmit';
 import { APP_CONSTANTS, ApplicantFormData } from '@/constants';
 import ResponsiblePersonSection from './form/ResponsiblePersonSection';
 import ContactInfoSection from './form/ContactInfoSection';
-import SpecializationsSection from './form/SpecializationsSection';
 import StudyInfoSection from './form/StudyInfoSection';
 import AdditionalDetailsSection from './form/AdditionalDetailsSection';
 import ExamScoresSection from './form/ExamScoresSection';
+import PreparationDirectionsSection, { PreparationDirection } from './form/PreparationDirectionsSection';
 
 const ApplicantForm = () => {
   const { responsiblePersons, specializations, loading, error } = useApplicantData();
@@ -40,52 +39,62 @@ const ApplicantForm = () => {
     entrance_subjects: []
   });
 
+  const [preparationDirections, setPreparationDirections] = useState<PreparationDirection[]>([]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.responsible_id || !formData.full_name || !formData.phone || 
-        !formData.study_form || !formData.education_type || 
-        formData.specialization_ids.length === 0) {
+        !formData.education_type || preparationDirections.length === 0) {
       return;
     }
 
-    const result = await submitApplicant(formData);
-    
-    if (result.success) {
-      // Сброс формы
-      setFormData({
-        responsible_id: '',
-        full_name: '',
-        phone: '',
-        email: '',
-        specialization_ids: [],
-        study_form: '',
-        education_type: '',
-        budget: false,
-        stream: undefined,
-        gender: '',
-        citizenship: '',
-        is_adult: undefined,
-        disability: undefined,
-        education_document: '',
-        contact_person_name: '',
-        contact_person_phone: '',
-        how_did_you_know: '',
-        exam_type: '',
-        exam_scores: {},
-        entrance_subjects: []
-      });
+    // Преобразуем направления подготовки в формат для отправки
+    // Берем первое направление как основное для совместимости
+    const primaryDirection = preparationDirections[0];
+    if (primaryDirection) {
+      const updatedFormData = {
+        ...formData,
+        specialization_ids: primaryDirection.specializationIds,
+        study_form: primaryDirection.studyForm,
+        budget: primaryDirection.budget
+      };
+
+      const result = await submitApplicant(updatedFormData);
+      
+      if (result.success) {
+        // Сброс формы
+        setFormData({
+          responsible_id: '',
+          full_name: '',
+          phone: '',
+          email: '',
+          specialization_ids: [],
+          study_form: '',
+          education_type: '',
+          budget: false,
+          stream: undefined,
+          gender: '',
+          citizenship: '',
+          is_adult: undefined,
+          disability: undefined,
+          education_document: '',
+          contact_person_name: '',
+          contact_person_phone: '',
+          how_did_you_know: '',
+          exam_type: '',
+          exam_scores: {},
+          entrance_subjects: []
+        });
+        setPreparationDirections([]);
+      }
     }
   };
 
-  const handleSpecializationChange = (specializationId: string, checked: boolean) => {
+  const handleEntranceSubjectsChange = (subjects: string[]) => {
     setFormData(prev => ({
       ...prev,
-      specialization_ids: checked 
-        ? [...prev.specialization_ids, specializationId]
-        : prev.specialization_ids.filter(id => id !== specializationId),
-      // Сбрасываем форму обучения при изменении специализаций
-      study_form: ''
+      entrance_subjects: subjects
     }));
   };
 
@@ -99,10 +108,14 @@ const ApplicantForm = () => {
     }));
   };
 
-  const handleEntranceSubjectsChange = (subjects: string[]) => {
+  const handleSpecializationChange = (specializationId: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
-      entrance_subjects: subjects
+      specialization_ids: checked 
+        ? [...prev.specialization_ids, specializationId]
+        : prev.specialization_ids.filter(id => id !== specializationId),
+      // Сбрасываем форму обучения при изменении специализаций
+      study_form: ''
     }));
   };
 
@@ -162,29 +175,41 @@ const ApplicantForm = () => {
                 onEmailChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
               />              
 
-              {/* Информация об обучении */}
-              <StudyInfoSection
-                specializations={specializations}
-                budget={formData.budget}
-                studyForm={formData.study_form}
-                selectedSpecializationIds={formData.specialization_ids}
-                educationType={formData.education_type}
-                onStudyFormChange={(value) => setFormData(prev => ({ ...prev, study_form: value }))}
-                onEducationTypeChange={(value) => setFormData(prev => ({ 
-                  ...prev, 
-                  education_type: value,
-                  specialization_ids: [], // Сбрасываем специализации при смене типа образования
-                  study_form: '' // Сбрасываем форму обучения
-                }))}
-                onBudgetChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
-              />
+              {/* Вид образования */}
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-gray-900">Информация об обучении</h3>
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700">Вид образования *</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {APP_CONSTANTS.EDUCATION_TYPES.map((type) => (
+                      <label key={type.value} className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          name="education_type"
+                          value={type.value}
+                          checked={formData.education_type === type.value}
+                          onChange={(e) => {
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              education_type: e.target.value,
+                            }));
+                            setPreparationDirections([]); // Сбрасываем направления при смене типа образования
+                          }}
+                          className="w-4 h-4 text-blue-600"
+                        />
+                        <span className="text-sm font-medium">{type.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
-              {/* Направления подготовки */}
-              <SpecializationsSection
+              {/* Новый компонент направлений подготовки */}
+              <PreparationDirectionsSection
+                directions={preparationDirections}
                 specializations={specializations}
-                selectedSpecializationIds={formData.specialization_ids}
                 educationType={formData.education_type}
-                onSpecializationChange={handleSpecializationChange}
+                onDirectionsChange={setPreparationDirections}
               />
 
               {/* Дополнительная информация */}
@@ -214,8 +239,8 @@ const ApplicantForm = () => {
                 citizenship={formData.citizenship}
                 examType={formData.exam_type}
                 examScores={formData.exam_scores || {}}
-                budget={formData.budget}
-                selectedSpecializationIds={formData.specialization_ids}
+                budget={preparationDirections.length > 0 ? preparationDirections[0].budget : false}
+                selectedSpecializationIds={preparationDirections.length > 0 ? preparationDirections[0].specializationIds : []}
                 specializations={specializations}
                 entranceSubjects={formData.entrance_subjects}
                 onExamTypeChange={(value) => setFormData(prev => ({ ...prev, exam_type: value }))}
