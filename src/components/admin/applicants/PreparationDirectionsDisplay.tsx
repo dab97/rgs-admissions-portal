@@ -46,23 +46,27 @@ const PreparationDirectionsDisplay = ({
           .map((direction) => (
             <Card key={direction.id} className="border-l-4 border-l-blue-500">
               <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <Badge variant="outline" className="font-medium">
-                    Приоритет {direction.priority}
-                  </Badge>
-                  <Badge variant={direction.budget ? "default" : "secondary"}>
-                    {direction.budget ? 'Бюджет' : 'Платное'}
-                  </Badge>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="font-medium">
+                      Приоритет {direction.priority}
+                    </Badge>
+                    <Badge 
+                      variant={direction.budget ? "default" : "secondary"}
+                      className={direction.budget ? "bg-green-100 text-green-700 border-green-200" : "bg-blue-100 text-blue-700 border-blue-200"}
+                    >
+                      {direction.budget ? 'Бюджет' : 'Платное'}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {getStudyFormLabel(direction.studyForm)}
+                    </Badge>
+                  </div>
                 </div>
                 
                 <div className="space-y-2 text-sm">
                   <div>
                     <span className="font-medium">Специализации:</span>{' '}
                     {getSpecializationNames(direction.specializationIds) || 'Не указано'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Форма обучения:</span>{' '}
-                    {getStudyFormLabel(direction.studyForm)}
                   </div>
                 </div>
               </CardContent>

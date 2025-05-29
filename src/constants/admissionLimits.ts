@@ -1,45 +1,91 @@
 
 export interface AdmissionLimit {
-  educationType: 'bachelor' | 'master';
   specialization: string;
+  educationType: 'bachelor' | 'master';
   studyForm: string;
   budgetPlaces: number;
   paidPlaces: number;
 }
 
 export const ADMISSION_LIMITS: AdmissionLimit[] = [
+  // Бакалавриат
   {
-    educationType: 'bachelor',
     specialization: 'Психология',
+    educationType: 'bachelor',
     studyForm: 'full_time',
     budgetPlaces: 10,
     paidPlaces: 55
   },
   {
-    educationType: 'bachelor',
     specialization: 'Психология',
-    studyForm: 'part_time_evening',
+    educationType: 'bachelor',
+    studyForm: 'part_time',
     budgetPlaces: 6,
     paidPlaces: 54
   },
   {
-    educationType: 'bachelor',
     specialization: 'Менеджмент',
+    educationType: 'bachelor',
     studyForm: 'full_time',
     budgetPlaces: 37,
     paidPlaces: 28
+  },
+  {
+    specialization: 'Социальная работа',
+    educationType: 'bachelor',
+    studyForm: 'full_time',
+    budgetPlaces: 10,
+    paidPlaces: 5
+  },
+  {
+    specialization: 'Социальная работа',
+    educationType: 'bachelor',
+    studyForm: 'correspondence',
+    budgetPlaces: 4,
+    paidPlaces: 68
+  },
+  {
+    specialization: 'Юриспруденция',
+    educationType: 'bachelor',
+    studyForm: 'full_time',
+    budgetPlaces: 10,
+    paidPlaces: 55
+  },
+  // Магистратура
+  {
+    specialization: 'Психология',
+    educationType: 'master',
+    studyForm: 'part_time',
+    budgetPlaces: 0,
+    paidPlaces: 15
+  },
+  {
+    specialization: 'Менеджмент',
+    educationType: 'master',
+    studyForm: 'correspondence',
+    budgetPlaces: 0,
+    paidPlaces: 15
   }
 ];
 
 export const getAdmissionLimit = (
-  educationType: string, 
-  specialization: string, 
+  specialization: string,
+  educationType: string,
   studyForm: string
-): AdmissionLimit | null => {
+): AdmissionLimit | undefined => {
   return ADMISSION_LIMITS.find(
-    limit => 
-      limit.educationType === educationType &&
+    limit =>
       limit.specialization === specialization &&
+      limit.educationType === educationType &&
       limit.studyForm === studyForm
-  ) || null;
+  );
+};
+
+export const getTotalPlaces = (
+  specialization: string,
+  educationType: string,
+  studyForm: string
+): number => {
+  const limit = getAdmissionLimit(specialization, educationType, studyForm);
+  return limit ? limit.budgetPlaces + limit.paidPlaces : 0;
 };

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { APP_CONSTANTS, Specialization } from '@/constants';
 import { Applicant, PreparationDirection } from '@/hooks/useApplicants';
 
@@ -85,6 +86,17 @@ const PreparationDirectionsSection = ({
     });
   };
 
+  const getSpecializationNames = (specializationIds: string[]) => {
+    return specializationIds
+      .map(id => specializations.find(s => s.id === id)?.name)
+      .filter(Boolean)
+      .join(', ');
+  };
+
+  const getStudyFormLabel = (value: string) => {
+    return APP_CONSTANTS.STUDY_FORMS.find(f => f.value === value)?.label || value;
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -108,7 +120,27 @@ const PreparationDirectionsSection = ({
             <Card key={direction.id} className="border-l-4 border-l-blue-500">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="font-medium">Приоритет {direction.priority}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="font-medium">
+                      Приоритет {direction.priority}
+                    </Badge>
+                    <Badge 
+                      variant={direction.budget ? "default" : "secondary"}
+                      className={direction.budget ? "bg-green-100 text-green-700 border-green-200" : "bg-blue-100 text-blue-700 border-blue-200"}
+                    >
+                      {direction.budget ? 'Бюджет' : 'Платное'}
+                    </Badge>
+                    {direction.studyForm && (
+                      <Badge variant="outline" className="text-xs">
+                        {getStudyFormLabel(direction.studyForm)}
+                      </Badge>
+                    )}
+                    {direction.specializationIds.length > 0 && (
+                      <span className="text-sm text-gray-600">
+                        {getSpecializationNames(direction.specializationIds)}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <Button
                       type="button"
