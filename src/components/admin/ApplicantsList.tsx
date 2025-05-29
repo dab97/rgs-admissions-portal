@@ -5,11 +5,23 @@ import { useApplicantData } from '@/hooks/useApplicantData';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import ApplicantsTable from './applicants/ApplicantsTable';
+import ApplicantsFilters from './applicants/ApplicantsFilters';
 import ApplicantViewDialog from './applicants/ApplicantViewDialog';
 import ApplicantEditDialog from './applicants/ApplicantEditDialog';
 
 const ApplicantsList = () => {
-  const { applicants, loading, updateApplicant, deleteApplicant } = useApplicants();
+  const { 
+    applicants, 
+    loading, 
+    updateApplicant, 
+    deleteApplicant,
+    sortField,
+    sortDirection,
+    filters,
+    handleSort,
+    handleFilterChange,
+    clearFilters
+  } = useApplicants();
   const { responsiblePersons, specializations } = useApplicantData();
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
   const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(null);
@@ -19,7 +31,14 @@ const ApplicantsList = () => {
   const handleEdit = (applicant: Applicant) => {
     setEditingApplicant({
       ...applicant,
-      specialization_ids: applicant.specialization_ids || []
+      specialization_ids: applicant.specialization_ids || [],
+      preparation_directions: applicant.preparation_directions || [{
+        id: 'legacy-direction',
+        budget: applicant.budget,
+        studyForm: applicant.study_form,
+        specializationIds: applicant.specialization_ids || [],
+        priority: 1
+      }]
     });
     setIsEditDialogOpen(true);
   };
@@ -32,6 +51,9 @@ const ApplicantsList = () => {
   const handleSave = async () => {
     if (!editingApplicant) return;
 
+    // Извлекаем данные из первого направления для совместимости с текущей структурой БД
+    const primaryDirection = editingApplicant.preparation_directions?.[0];
+    
     await updateApplicant(editingApplicant.id, {
       status: editingApplicant.status,
       admin_notes: editingApplicant.admin_notes,
@@ -39,9 +61,9 @@ const ApplicantsList = () => {
       phone: editingApplicant.phone,
       email: editingApplicant.email,
       responsible_id: editingApplicant.responsible_id,
-      study_form: editingApplicant.study_form,
+      study_form: primaryDirection?.studyForm || editingApplicant.study_form,
       education_type: editingApplicant.education_type,
-      budget: editingApplicant.budget,
+      budget: primaryDirection?.budget ?? editingApplicant.budget,
       stream: editingApplicant.stream,
       gender: editingApplicant.gender,
       citizenship: editingApplicant.citizenship,
@@ -54,7 +76,7 @@ const ApplicantsList = () => {
       exam_type: editingApplicant.exam_type,
       exam_scores: editingApplicant.exam_scores,
       entrance_subjects: editingApplicant.entrance_subjects,
-      specialization_ids: editingApplicant.specialization_ids
+      specialization_ids: primaryDirection?.specializationIds || editingApplicant.specialization_ids
     });
 
     setIsEditDialogOpen(false);
@@ -92,12 +114,21 @@ const ApplicantsList = () => {
             Управление заявками поступающих абитуриентов
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          <ApplicantsFilters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onClearFilters={clearFilters}
+          />
+          
           <ApplicantsTable
             applicants={applicants}
             onView={handleView}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
           />
         </CardContent>
       </Card>
@@ -106,6 +137,7 @@ const ApplicantsList = () => {
         isOpen={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         applicant={selectedApplicant}
+        specializations={specializations}
       />
 
       <ApplicantEditDialog

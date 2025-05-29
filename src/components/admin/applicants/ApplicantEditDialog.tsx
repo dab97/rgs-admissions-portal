@@ -9,6 +9,7 @@ import EducationSection from './sections/EducationSection';
 import AdditionalInfoSection from './sections/AdditionalInfoSection';
 import StatusSection from './sections/StatusSection';
 import ExamInfoSection from './sections/ExamInfoSection';
+import PreparationDirectionsSection from './sections/PreparationDirectionsSection';
 
 interface ApplicantEditDialogProps {
   isOpen: boolean;
@@ -33,7 +34,7 @@ const ApplicantEditDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Редактировать заявку</DialogTitle>
         </DialogHeader>
@@ -48,6 +49,12 @@ const ApplicantEditDialog = ({
           <EducationSection
             applicant={applicant}
             onApplicantChange={onApplicantChange}
+          />
+          
+          <PreparationDirectionsSection
+            applicant={applicant}
+            onApplicantChange={onApplicantChange}
+            specializations={specializations}
           />
           
           <AdditionalInfoSection

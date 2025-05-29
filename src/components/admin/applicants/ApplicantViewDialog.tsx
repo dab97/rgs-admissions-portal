@@ -4,15 +4,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Applicant } from '@/hooks/useApplicants';
-import { APP_CONSTANTS } from '@/constants';
+import { APP_CONSTANTS, Specialization } from '@/constants';
+import PreparationDirectionsDisplay from './PreparationDirectionsDisplay';
 
 interface ApplicantViewDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   applicant: Applicant | null;
+  specializations?: Specialization[];
 }
 
-const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewDialogProps) => {
+const ApplicantViewDialog = ({ 
+  isOpen, 
+  onOpenChange, 
+  applicant, 
+  specializations = [] 
+}: ApplicantViewDialogProps) => {
   const getStatusBadge = (status: string | null) => {
     switch (status) {
       case 'approved':
@@ -72,20 +79,10 @@ const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewD
               <div className="mt-1 text-sm">{applicant.citizenship || 'Не указано'}</div>
             </div>
             <div>
-              <Label>Форма обучения</Label>
-              <div className="mt-1 text-sm">
-                {APP_CONSTANTS.STUDY_FORMS.find(f => f.value === applicant.study_form)?.label || applicant.study_form}
-              </div>
-            </div>
-            <div>
               <Label>Вид образования</Label>
               <div className="mt-1 text-sm">
                 {APP_CONSTANTS.EDUCATION_TYPES.find(t => t.value === applicant.education_type)?.label || applicant.education_type}
               </div>
-            </div>
-            <div>
-              <Label>Бюджет</Label>
-              <div className="mt-1 text-sm">{applicant.budget ? 'Да' : 'Нет'}</div>
             </div>
             <div>
               <Label>Поток</Label>
@@ -109,10 +106,10 @@ const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewD
             </div>
           </div>
           
-          <div>
-            <Label>Специализации</Label>
-            <div className="mt-1 text-sm">{applicant.specializations?.join(', ') || 'Не указано'}</div>
-          </div>
+          <PreparationDirectionsDisplay
+            directions={applicant.preparation_directions || []}
+            specializations={specializations}
+          />
 
           {(applicant.contact_person_name || applicant.contact_person_phone) && (
             <div className="grid grid-cols-2 gap-4">
@@ -131,6 +128,32 @@ const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewD
             <Label>Откуда узнали о нас</Label>
             <div className="mt-1 text-sm">{getHowDidYouKnowLabel(applicant.how_did_you_know)}</div>
           </div>
+
+          {applicant.exam_type && (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Тип экзамена</Label>
+                <div className="mt-1 text-sm">{applicant.exam_type}</div>
+              </div>
+              {applicant.exam_scores && Object.keys(applicant.exam_scores).length > 0 && (
+                <div>
+                  <Label>Баллы ЕГЭ/ЦТ</Label>
+                  <div className="mt-1 text-sm">
+                    {Object.entries(applicant.exam_scores).map(([subject, score]) => (
+                      <div key={subject}>{subject}: {score}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {applicant.entrance_subjects && applicant.entrance_subjects.length > 0 && (
+            <div>
+              <Label>Вступительные испытания</Label>
+              <div className="mt-1 text-sm">{applicant.entrance_subjects.join(', ')}</div>
+            </div>
+          )}
 
           <div>
             <Label>Статус</Label>

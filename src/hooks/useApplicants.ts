@@ -3,6 +3,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+export interface PreparationDirection {
+  id: string;
+  budget: boolean;
+  studyForm: string;
+  specializationIds: string[];
+  priority: number;
+}
+
 export interface Applicant {
   id: string;
   full_name: string;
@@ -31,17 +39,28 @@ export interface Applicant {
   responsible_persons: { name: string } | null;
   specializations: string[];
   specialization_ids?: string[];
+  preparation_directions?: PreparationDirection[];
 }
 
 export const useApplicants = () => {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<string>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [filters, setFilters] = useState({
+    status: '',
+    education_type: '',
+    study_form: '',
+    budget: '',
+    specialization: '',
+    search: ''
+  });
   const { toast } = useToast();
 
   const fetchApplicants = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('applicants')
         .select(`
           *,
@@ -49,8 +68,29 @@ export const useApplicants = () => {
           applicant_specializations (
             specializations (id, name)
           )
-        `)
-        .order('created_at', { ascending: false });
+        `);
+
+      // Apply filters
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters.education_type) {
+        query = query.eq('education_type', filters.education_type);
+      }
+      if (filters.study_form) {
+        query = query.eq('study_form', filters.study_form);
+      }
+      if (filters.budget !== '') {
+        query = query.eq('budget', filters.budget === 'true');
+      }
+      if (filters.search) {
+        query = query.or(`full_name.ilike.%${filters.search}%,phone.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+      }
+
+      // Apply sorting
+      query = query.order(sortField, { ascending: sortDirection === 'asc' });
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -64,7 +104,17 @@ export const useApplicants = () => {
         ).filter(Boolean) || [],
         exam_type: applicant.exam_type || null,
         exam_scores: applicant.exam_scores || null,
-        entrance_subjects: applicant.entrance_subjects || null
+        entrance_subjects: applicant.entrance_subjects || null,
+        // Временно создаем направления из текущих данных для совместимости
+        preparation_directions: [{
+          id: 'legacy-direction',
+          budget: applicant.budget,
+          studyForm: applicant.study_form,
+          specializationIds: applicant.applicant_specializations?.map((as: any) => 
+            as.specializations?.id
+          ).filter(Boolean) || [],
+          priority: 1
+        }]
       })) || [];
 
       setApplicants(formattedApplicants);
@@ -78,7 +128,7 @@ export const useApplicants = () => {
 
   const updateApplicant = async (id: string, updates: Partial<Applicant>) => {
     try {
-      const { specialization_ids, ...applicantUpdates } = updates;
+      const { specialization_ids, preparation_directions, ...applicantUpdates } = updates;
       
       // Обновляем основную информацию о поступающем
       const { error: updateError } = await supabase
@@ -154,9 +204,33 @@ export const useApplicants = () => {
     }
   };
 
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      status: '',
+      education_type: '',
+      study_form: '',
+      budget: '',
+      specialization: '',
+      search: ''
+    });
+  };
+
   useEffect(() => {
     fetchApplicants();
-  }, []);
+  }, [sortField, sortDirection, filters]);
 
   return {
     applicants,
@@ -164,6 +238,12 @@ export const useApplicants = () => {
     error,
     updateApplicant,
     deleteApplicant,
-    refetch: fetchApplicants
+    refetch: fetchApplicants,
+    sortField,
+    sortDirection,
+    filters,
+    handleSort,
+    handleFilterChange,
+    clearFilters
   };
 };

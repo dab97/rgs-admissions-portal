@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Edit, Trash2, Eye } from 'lucide-react';
+import { Edit, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Applicant } from '@/hooks/useApplicants';
 import { APP_CONSTANTS } from '@/constants';
 
@@ -13,9 +13,20 @@ interface ApplicantsTableProps {
   onView: (applicant: Applicant) => void;
   onEdit: (applicant: Applicant) => void;
   onDelete: (id: string) => void;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
+  onSort: (field: string) => void;
 }
 
-const ApplicantsTable = ({ applicants, onView, onEdit, onDelete }: ApplicantsTableProps) => {
+const ApplicantsTable = ({ 
+  applicants, 
+  onView, 
+  onEdit, 
+  onDelete, 
+  sortField, 
+  sortDirection, 
+  onSort 
+}: ApplicantsTableProps) => {
   const getStatusBadge = (status: string | null) => {
     switch (status) {
       case 'approved':
@@ -29,17 +40,39 @@ const ApplicantsTable = ({ applicants, onView, onEdit, onDelete }: ApplicantsTab
     }
   };
 
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-4 w-4" />;
+    }
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+  };
+
+  const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
+    <TableHead>
+      <Button
+        variant="ghost"
+        onClick={() => onSort(field)}
+        className="h-auto p-0 font-medium hover:bg-transparent"
+      >
+        <div className="flex items-center gap-2">
+          {children}
+          {getSortIcon(field)}
+        </div>
+      </Button>
+    </TableHead>
+  );
+
   return (
     <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ФИО</TableHead>
-            <TableHead>Телефон</TableHead>
-            <TableHead>Специализации</TableHead>
-            <TableHead>Форма обучения</TableHead>
-            <TableHead>Статус</TableHead>
-            <TableHead>Дата подачи</TableHead>
+            <SortableHeader field="full_name">ФИО</SortableHeader>
+            <SortableHeader field="phone">Телефон</SortableHeader>
+            <TableHead>Направления подготовки</TableHead>
+            <SortableHeader field="education_type">Вид образования</SortableHeader>
+            <SortableHeader field="status">Статус</SortableHeader>
+            <SortableHeader field="created_at">Дата подачи</SortableHeader>
             <TableHead>Действия</TableHead>
           </TableRow>
         </TableHeader>
@@ -58,12 +91,27 @@ const ApplicantsTable = ({ applicants, onView, onEdit, onDelete }: ApplicantsTab
                 </TableCell>
                 <TableCell>{applicant.phone}</TableCell>
                 <TableCell>
-                  <div className="max-w-xs truncate">
-                    {applicant.specializations?.join(', ') || 'Не указано'}
+                  <div className="max-w-xs">
+                    {applicant.preparation_directions?.map((direction, index) => (
+                      <div key={direction.id} className="text-sm mb-1">
+                        <span className="font-medium">#{direction.priority}</span>{' '}
+                        {applicant.specializations?.join(', ') || 'Не указано'}{' '}
+                        <span className="text-gray-500">
+                          ({APP_CONSTANTS.STUDY_FORMS.find(f => f.value === direction.studyForm)?.label}, {direction.budget ? 'Бюджет' : 'Платное'})
+                        </span>
+                      </div>
+                    )) || (
+                      <div className="text-sm">
+                        {applicant.specializations?.join(', ') || 'Не указано'}{' '}
+                        <span className="text-gray-500">
+                          ({APP_CONSTANTS.STUDY_FORMS.find(f => f.value === applicant.study_form)?.label}, {applicant.budget ? 'Бюджет' : 'Платное'})
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>
-                  {APP_CONSTANTS.STUDY_FORMS.find(f => f.value === applicant.study_form)?.label || applicant.study_form}
+                  {APP_CONSTANTS.EDUCATION_TYPES.find(t => t.value === applicant.education_type)?.label || applicant.education_type}
                 </TableCell>
                 <TableCell>
                   {getStatusBadge(applicant.status)}
