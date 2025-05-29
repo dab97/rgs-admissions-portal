@@ -1,82 +1,81 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { ApplicantFormData } from '@/constants';
-import { useToast } from '@/hooks/use-toast';
-import { APP_CONSTANTS } from '@/constants';
 
 export const useApplicantSubmit = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
   const submitApplicant = async (formData: ApplicantFormData) => {
     setIsSubmitting(true);
     
     try {
-      // Создаем запись абитуриента
-      const { data: applicantData, error: applicantError } = await supabase
+      // Prepare exam_scores as JSON-compatible object
+      const examScoresJson = formData.exam_scores ? 
+        Object.fromEntries(Object.entries(formData.exam_scores)) : {};
+
+      const { data, error } = await supabase
         .from('applicants')
         .insert({
-          responsible_id: formData.responsible_id,
+          responsible_person_id: formData.responsible_id, // Changed from responsible_id
           full_name: formData.full_name,
           phone: formData.phone,
-          email: formData.email || null,
+          email: formData.email,
           study_form: formData.study_form,
           education_type: formData.education_type,
           budget: formData.budget,
-          stream: formData.stream || null,
-          gender: formData.gender || null,
-          citizenship: formData.citizenship || null,
-          is_adult: formData.is_adult || null,
-          disability: formData.disability || null,
-          education_document: formData.education_document || null,
-          contact_person_name: formData.contact_person_name || null,
-          contact_person_phone: formData.contact_person_phone || null,
-          how_did_you_know: formData.how_did_you_know || null,
-          exam_type: formData.exam_type || null,
-          exam_scores: formData.exam_scores || null,
-          entrance_subjects: formData.entrance_subjects || null
+          stream: formData.stream,
+          gender: formData.gender,
+          citizenship: formData.citizenship,
+          is_adult: formData.is_adult,
+          disability: formData.disability,
+          education_document: formData.education_document,
+          contact_person_name: formData.contact_person_name,
+          contact_person_phone: formData.contact_person_phone,
+          how_did_you_know: formData.how_did_you_know,
+          exam_type: formData.exam_type,
+          exam_scores: examScoresJson, // Now properly typed as JSON
+          entrance_subjects: formData.entrance_subjects,
+          status: 'pending'
         })
         .select()
         .single();
 
-      if (applicantError) throw applicantError;
+      if (error) {
+        console.error('Error submitting applicant:', error);
+        toast.error('Ошибка при отправке заявки: ' + error.message);
+        return { success: false, error };
+      }
 
-      // Создаем связи с специализациями
+      // Insert specializations
       if (formData.specialization_ids.length > 0) {
-        const specializationInserts = formData.specialization_ids.map(specId => ({
-          applicant_id: applicantData.id,
-          specialization_id: specId
+        const specializationInserts = formData.specialization_ids.map(specializationId => ({
+          applicant_id: data.id,
+          specialization_id: specializationId
         }));
 
         const { error: specializationError } = await supabase
           .from('applicant_specializations')
           .insert(specializationInserts);
 
-        if (specializationError) throw specializationError;
+        if (specializationError) {
+          console.error('Error inserting specializations:', specializationError);
+          toast.error('Ошибка при добавлении специализаций');
+          return { success: false, error: specializationError };
+        }
       }
 
-      toast({
-        title: APP_CONSTANTS.MESSAGES.SUCCESS.APPLICATION_SUBMITTED,
-        description: APP_CONSTANTS.MESSAGES.SUCCESS.APPLICATION_SUBMITTED_DESC,
-      });
-
-      return { success: true, data: applicantData };
+      toast.success('Заявка успешно отправлена!');
+      return { success: true, data };
     } catch (error) {
-      console.error('Error submitting applicant:', error);
-      toast({
-        title: APP_CONSTANTS.MESSAGES.ERROR.FORM_VALIDATION,
-        description: 'Произошла ошибка при сохранении данных.',
-        variant: "destructive",
-      });
+      console.error('Unexpected error:', error);
+      toast.error('Произошла неожиданная ошибка');
       return { success: false, error };
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return {
-    submitApplicant,
-    isSubmitting
-  };
+  return { submitApplicant, isSubmitting };
 };
