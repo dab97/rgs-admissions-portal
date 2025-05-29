@@ -139,7 +139,7 @@ const ApplicantViewDialog = ({
                 <div>
                   <Label>Баллы ЕГЭ/ЦТ</Label>
                   <div className="mt-1 text-sm">
-                    {Object.entries(applicant.exam_scores).map(([subject, score]) => (
+                    {Object.entries(applicant.exam_scores as Record<string, number>).map(([subject, score]) => (
                       <div key={subject}>{subject}: {score}</div>
                     ))}
                   </div>
