@@ -3,7 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Applicant } from '@/hooks/useApplicants';
+import { Applicant } from '@/types/applicant';
 import { APP_CONSTANTS, Specialization } from '@/constants';
 import PreparationDirectionsDisplay from './PreparationDirectionsDisplay';
 

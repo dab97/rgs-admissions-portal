@@ -2,7 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Applicant } from '@/hooks/useApplicants';
+import { Applicant } from '@/types/applicant';
 import { ResponsiblePerson, Specialization } from '@/constants';
 import BasicInfoSection from './sections/BasicInfoSection';
 import EducationSection from './sections/EducationSection';

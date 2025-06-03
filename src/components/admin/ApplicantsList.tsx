@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
-import { useApplicants, Applicant } from '@/hooks/useApplicants';
+import { useApplicants } from '@/hooks/useApplicants';
 import { useApplicantData } from '@/hooks/useApplicantData';
+import { Applicant } from '@/types/applicant';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import ApplicantsTable from './applicants/ApplicantsTable';

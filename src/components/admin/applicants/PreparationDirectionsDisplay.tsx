@@ -3,7 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { PreparationDirection } from '@/hooks/useApplicants';
+import { PreparationDirection } from '@/types/applicant';
 import { APP_CONSTANTS, Specialization } from '@/constants';
 
 interface PreparationDirectionsDisplayProps {

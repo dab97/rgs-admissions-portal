@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { APP_CONSTANTS, Specialization } from '@/constants';
-import { Applicant, PreparationDirection } from '@/hooks/useApplicants';
+import { Applicant, PreparationDirection } from '@/types/applicant';
 
 interface PreparationDirectionsSectionProps {
   applicant: Applicant;
