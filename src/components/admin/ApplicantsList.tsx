@@ -30,16 +30,21 @@ const ApplicantsList = () => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   const handleEdit = (applicant: Applicant) => {
+    // Преобразуем старый формат в новый формат направлений подготовки
+    const preparationDirections = applicant.preparation_directions && applicant.preparation_directions.length > 0
+      ? applicant.preparation_directions
+      : [{
+          id: 'legacy-direction',
+          budget: applicant.budget,
+          studyForm: applicant.study_form,
+          specializationIds: applicant.specialization_ids || [],
+          priority: 1
+        }];
+
     setEditingApplicant({
       ...applicant,
       specialization_ids: applicant.specialization_ids || [],
-      preparation_directions: applicant.preparation_directions || [{
-        id: 'legacy-direction',
-        budget: applicant.budget,
-        studyForm: applicant.study_form,
-        specializationIds: applicant.specialization_ids || [],
-        priority: 1
-      }]
+      preparation_directions: preparationDirections
     });
     setIsEditDialogOpen(true);
   };

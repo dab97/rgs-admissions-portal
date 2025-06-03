@@ -62,6 +62,29 @@ const ApplicantsTable = ({
     </TableHead>
   );
 
+  const getDirectionDisplayText = (applicant: Applicant) => {
+    if (!applicant.preparation_directions || applicant.preparation_directions.length === 0) {
+      // Fallback к старому формату
+      const specs = applicant.specializations?.join(', ') || 'Не указано';
+      const budgetText = applicant.budget ? 'Бюджет' : 'Платное';
+      const studyFormText = APP_CONSTANTS.STUDY_FORMS.find(f => f.value === applicant.study_form)?.label || applicant.study_form;
+      return `${specs} (${studyFormText}, ${budgetText})`;
+    }
+
+    return applicant.preparation_directions
+      .sort((a, b) => a.priority - b.priority)
+      .map((direction) => {
+        const specs = applicant.specializations?.join(', ') || 'Не указано';
+        const budgetText = direction.budget ? 'Бюджет' : 'Платное';
+        const studyFormText = direction.studyForm ? 
+          APP_CONSTANTS.STUDY_FORMS.find(f => f.value === direction.studyForm)?.label || direction.studyForm :
+          'Форма не выбрана';
+        
+        return `#${direction.priority} ${specs} (${studyFormText}, ${budgetText})`;
+      })
+      .join('; ');
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -91,23 +114,8 @@ const ApplicantsTable = ({
                 </TableCell>
                 <TableCell>{applicant.phone}</TableCell>
                 <TableCell>
-                  <div className="max-w-xs">
-                    {applicant.preparation_directions?.map((direction, index) => (
-                      <div key={direction.id} className="text-sm mb-1">
-                        <span className="font-medium">#{direction.priority}</span>{' '}
-                        {applicant.specializations?.join(', ') || 'Не указано'}{' '}
-                        <span className="text-gray-500">
-                          ({APP_CONSTANTS.STUDY_FORMS.find(f => f.value === direction.studyForm)?.label}, {direction.budget ? 'Бюджет' : 'Платное'})
-                        </span>
-                      </div>
-                    )) || (
-                      <div className="text-sm">
-                        {applicant.specializations?.join(', ') || 'Не указано'}{' '}
-                        <span className="text-gray-500">
-                          ({APP_CONSTANTS.STUDY_FORMS.find(f => f.value === applicant.study_form)?.label}, {applicant.budget ? 'Бюджет' : 'Платное'})
-                        </span>
-                      </div>
-                    )}
+                  <div className="max-w-xs text-sm">
+                    {getDirectionDisplayText(applicant)}
                   </div>
                 </TableCell>
                 <TableCell>

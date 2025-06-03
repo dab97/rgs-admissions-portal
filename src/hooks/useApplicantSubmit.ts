@@ -3,11 +3,16 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ApplicantFormData } from '@/constants';
+import { PreparationDirection } from '@/components/form/PreparationDirectionsSection';
+
+interface SubmitFormData extends ApplicantFormData {
+  preparation_directions?: PreparationDirection[];
+}
 
 export const useApplicantSubmit = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submitApplicant = async (formData: ApplicantFormData) => {
+  const submitApplicant = async (formData: SubmitFormData) => {
     setIsSubmitting(true);
     
     try {
@@ -15,16 +20,19 @@ export const useApplicantSubmit = () => {
       const examScoresJson = formData.exam_scores ? 
         Object.fromEntries(Object.entries(formData.exam_scores)) : {};
 
+      // Извлекаем данные из первого направления для совместимости с БД
+      const primaryDirection = formData.preparation_directions?.[0];
+      
       const { data, error } = await supabase
         .from('applicants')
         .insert({
-          responsible_id: formData.responsible_id, // Fixed: use responsible_id instead of responsible_person_id
+          responsible_id: formData.responsible_id,
           full_name: formData.full_name,
           phone: formData.phone,
           email: formData.email,
-          study_form: formData.study_form,
+          study_form: primaryDirection?.studyForm || formData.study_form,
           education_type: formData.education_type,
-          budget: formData.budget,
+          budget: primaryDirection?.budget ?? formData.budget,
           stream: formData.stream,
           gender: formData.gender,
           citizenship: formData.citizenship,
@@ -48,9 +56,10 @@ export const useApplicantSubmit = () => {
         return { success: false, error };
       }
 
-      // Insert specializations
-      if (formData.specialization_ids.length > 0) {
-        const specializationInserts = formData.specialization_ids.map(specializationId => ({
+      // Insert specializations from preparation directions
+      const specializationIds = primaryDirection?.specializationIds || formData.specialization_ids;
+      if (specializationIds && specializationIds.length > 0) {
+        const specializationInserts = specializationIds.map(specializationId => ({
           applicant_id: data.id,
           specialization_id: specializationId
         }));
