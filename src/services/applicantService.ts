@@ -68,19 +68,31 @@ export const fetchApplicants = async (
 };
 
 export const updateApplicant = async (id: string, updates: Partial<Applicant>) => {
-  const { specialization_ids, preparation_directions, ...applicantUpdates } = updates;
+  const { preparation_directions, ...applicantUpdates } = updates;
   
-  // Обновляем основную информацию о поступающем
-  const { error: updateError } = await supabase
-    .from('applicants')
-    .update(applicantUpdates)
-    .eq('id', id);
+  // Извлекаем данные из первого направления для совместимости с текущей структурой БД
+  if (preparation_directions && preparation_directions.length > 0) {
+    const primaryDirection = preparation_directions[0];
+    applicantUpdates.study_form = primaryDirection.studyForm;
+    applicantUpdates.budget = primaryDirection.budget;
+    
+    // Собираем все специализации из всех направлений
+    const allSpecializationIds = preparation_directions.reduce((acc, direction) => {
+      return [...acc, ...direction.specializationIds];
+    }, [] as string[]);
+    
+    // Удаляем дубликаты
+    const uniqueSpecializationIds = [...new Set(allSpecializationIds)];
+    
+    // Обновляем основную информацию о поступающем
+    const { error: updateError } = await supabase
+      .from('applicants')
+      .update(applicantUpdates)
+      .eq('id', id);
 
-  if (updateError) throw updateError;
+    if (updateError) throw updateError;
 
-  // Если есть изменения в специализациях, обновляем их
-  if (specialization_ids !== undefined) {
-    // Удаляем старые связи
+    // Удаляем старые связи со специализациями
     const { error: deleteError } = await supabase
       .from('applicant_specializations')
       .delete()
@@ -88,9 +100,9 @@ export const updateApplicant = async (id: string, updates: Partial<Applicant>) =
 
     if (deleteError) throw deleteError;
 
-    // Добавляем новые связи
-    if (specialization_ids.length > 0) {
-      const specializationInserts = specialization_ids.map(specId => ({
+    // Добавляем новые связи со специализациями
+    if (uniqueSpecializationIds.length > 0) {
+      const specializationInserts = uniqueSpecializationIds.map(specId => ({
         applicant_id: id,
         specialization_id: specId
       }));
@@ -101,6 +113,14 @@ export const updateApplicant = async (id: string, updates: Partial<Applicant>) =
 
       if (insertError) throw insertError;
     }
+  } else {
+    // Если нет направлений подготовки, просто обновляем основную информацию
+    const { error: updateError } = await supabase
+      .from('applicants')
+      .update(applicantUpdates)
+      .eq('id', id);
+
+    if (updateError) throw updateError;
   }
 };
 

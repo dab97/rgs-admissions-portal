@@ -57,9 +57,7 @@ const ApplicantsList = () => {
   const handleSave = async () => {
     if (!editingApplicant) return;
 
-    // Извлекаем данные из первого направления для совместимости с текущей структурой БД
-    const primaryDirection = editingApplicant.preparation_directions?.[0];
-    
+    // Используем новую структуру данных с несколькими направлениями подготовки
     await updateApplicant(editingApplicant.id, {
       status: editingApplicant.status,
       admin_notes: editingApplicant.admin_notes,
@@ -67,9 +65,7 @@ const ApplicantsList = () => {
       phone: editingApplicant.phone,
       email: editingApplicant.email,
       responsible_id: editingApplicant.responsible_id,
-      study_form: primaryDirection?.studyForm || editingApplicant.study_form,
       education_type: editingApplicant.education_type,
-      budget: primaryDirection?.budget ?? editingApplicant.budget,
       stream: editingApplicant.stream,
       gender: editingApplicant.gender,
       citizenship: editingApplicant.citizenship,
@@ -82,7 +78,7 @@ const ApplicantsList = () => {
       exam_type: editingApplicant.exam_type,
       exam_scores: editingApplicant.exam_scores,
       entrance_subjects: editingApplicant.entrance_subjects,
-      specialization_ids: primaryDirection?.specializationIds || editingApplicant.specialization_ids
+      preparation_directions: editingApplicant.preparation_directions
     });
 
     setIsEditDialogOpen(false);

@@ -56,22 +56,30 @@ export const useApplicantSubmit = () => {
         return { success: false, error };
       }
 
-      // Insert specializations from preparation directions
-      const specializationIds = primaryDirection?.specializationIds || formData.specialization_ids;
-      if (specializationIds && specializationIds.length > 0) {
-        const specializationInserts = specializationIds.map(specializationId => ({
-          applicant_id: data.id,
-          specialization_id: specializationId
-        }));
+      // Insert specializations from all preparation directions
+      if (formData.preparation_directions && formData.preparation_directions.length > 0) {
+        const allSpecializationIds = formData.preparation_directions.reduce((acc, direction) => {
+          return [...acc, ...direction.specializationIds];
+        }, [] as string[]);
+        
+        // Удаляем дубликаты
+        const uniqueSpecializationIds = [...new Set(allSpecializationIds)];
+        
+        if (uniqueSpecializationIds.length > 0) {
+          const specializationInserts = uniqueSpecializationIds.map(specializationId => ({
+            applicant_id: data.id,
+            specialization_id: specializationId
+          }));
 
-        const { error: specializationError } = await supabase
-          .from('applicant_specializations')
-          .insert(specializationInserts);
+          const { error: specializationError } = await supabase
+            .from('applicant_specializations')
+            .insert(specializationInserts);
 
-        if (specializationError) {
-          console.error('Error inserting specializations:', specializationError);
-          toast.error('Ошибка при добавлении специализаций');
-          return { success: false, error: specializationError };
+          if (specializationError) {
+            console.error('Error inserting specializations:', specializationError);
+            toast.error('Ошибка при добавлении специализаций');
+            return { success: false, error: specializationError };
+          }
         }
       }
 
