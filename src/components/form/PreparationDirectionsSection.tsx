@@ -147,6 +147,23 @@ const PreparationDirectionsSection = ({
     });
   };
 
+  const getDirectionDisplayText = (direction: PreparationDirection) => {
+    const availableSpecializations = getAvailableSpecializations();
+    const specs = direction.specializationIds.length > 0 
+      ? availableSpecializations
+          .filter(s => direction.specializationIds.includes(s.id))
+          .map(s => s.name)
+          .join(', ')
+      : 'Не выбрано';
+    
+    const budgetText = direction.budget ? 'Бюджет' : 'Платное';
+    const studyFormText = direction.studyForm ? 
+      APP_CONSTANTS.STUDY_FORMS.find(f => f.value === direction.studyForm)?.label || direction.studyForm :
+      'Форма не выбрана';
+    
+    return `${specs} (${budgetText}, ${studyFormText})`;
+  };
+
   const availableSpecializations = getAvailableSpecializations();
 
   return (
@@ -193,14 +210,7 @@ const PreparationDirectionsSection = ({
                   <div className="flex items-center gap-3">
                     <GripVertical className="h-4 w-4 text-gray-400" />
                     <span className="font-medium">
-                      Приоритет {direction.priority}: {
-                        direction.specializationIds.length > 0 
-                          ? availableSpecializations
-                              .filter(s => direction.specializationIds.includes(s.id))
-                              .map(s => s.name)
-                              .join(', ')
-                          : 'Не выбрано'
-                      }
+                      Приоритет {direction.priority}: {getDirectionDisplayText(direction)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
