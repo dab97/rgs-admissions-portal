@@ -20,7 +20,13 @@ interface ApplicantsFiltersProps {
 }
 
 const ApplicantsFilters = ({ filters, onFilterChange, onClearFilters }: ApplicantsFiltersProps) => {
-  const hasActiveFilters = Object.values(filters).some(value => value !== '');
+  const hasActiveFilters = Object.values(filters).some(value => value !== '' && value !== 'all');
+
+  const handleFilterChange = (key: string, value: string) => {
+    // Convert "all" back to empty string for the actual filter logic
+    const filterValue = value === 'all' ? '' : value;
+    onFilterChange(key, filterValue);
+  };
 
   return (
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
@@ -45,12 +51,12 @@ const ApplicantsFilters = ({ filters, onFilterChange, onClearFilters }: Applican
           />
         </div>
 
-        <Select value={filters.status} onValueChange={(value) => onFilterChange('status', value)}>
+        <Select value={filters.status || 'all'} onValueChange={(value) => handleFilterChange('status', value)}>
           <SelectTrigger>
             <SelectValue placeholder="Статус" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Все статусы</SelectItem>
+            <SelectItem value="all">Все статусы</SelectItem>
             <SelectItem value="pending">Ожидает</SelectItem>
             <SelectItem value="under_review">На рассмотрении</SelectItem>
             <SelectItem value="approved">Одобрено</SelectItem>
@@ -58,12 +64,12 @@ const ApplicantsFilters = ({ filters, onFilterChange, onClearFilters }: Applican
           </SelectContent>
         </Select>
 
-        <Select value={filters.education_type} onValueChange={(value) => onFilterChange('education_type', value)}>
+        <Select value={filters.education_type || 'all'} onValueChange={(value) => handleFilterChange('education_type', value)}>
           <SelectTrigger>
             <SelectValue placeholder="Вид образования" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Все виды</SelectItem>
+            <SelectItem value="all">Все виды</SelectItem>
             {APP_CONSTANTS.EDUCATION_TYPES.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.label}
@@ -72,12 +78,12 @@ const ApplicantsFilters = ({ filters, onFilterChange, onClearFilters }: Applican
           </SelectContent>
         </Select>
 
-        <Select value={filters.study_form} onValueChange={(value) => onFilterChange('study_form', value)}>
+        <Select value={filters.study_form || 'all'} onValueChange={(value) => handleFilterChange('study_form', value)}>
           <SelectTrigger>
             <SelectValue placeholder="Форма обучения" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Все формы</SelectItem>
+            <SelectItem value="all">Все формы</SelectItem>
             {APP_CONSTANTS.STUDY_FORMS.map((form) => (
               <SelectItem key={form.value} value={form.value}>
                 {form.label}
@@ -86,12 +92,12 @@ const ApplicantsFilters = ({ filters, onFilterChange, onClearFilters }: Applican
           </SelectContent>
         </Select>
 
-        <Select value={filters.budget} onValueChange={(value) => onFilterChange('budget', value)}>
+        <Select value={filters.budget || 'all'} onValueChange={(value) => handleFilterChange('budget', value)}>
           <SelectTrigger>
             <SelectValue placeholder="Финансирование" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Все</SelectItem>
+            <SelectItem value="all">Все</SelectItem>
             <SelectItem value="true">Бюджет</SelectItem>
             <SelectItem value="false">Платное</SelectItem>
           </SelectContent>
