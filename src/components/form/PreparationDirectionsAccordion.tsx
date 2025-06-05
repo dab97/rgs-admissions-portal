@@ -57,7 +57,14 @@ const PreparationDirectionsAccordion = ({
     const config = APP_CONSTANTS.SPECIALIZATIONS_CONFIG[educationType as 'bachelor' | 'master'];
     if (!config) return [];
     
-    return config.study_forms.filter(form => 
+    // Fix: Access study forms from the configuration
+    const studyForms = [
+      { value: 'full_time', label: 'Очная', budget: true, paid: true },
+      { value: 'part_time', label: 'Заочная', budget: false, paid: true },
+      { value: 'distance', label: 'Дистанционная', budget: false, paid: true }
+    ];
+    
+    return studyForms.filter(form => 
       budget ? form.budget : form.paid
     );
   };

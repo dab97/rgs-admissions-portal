@@ -1,46 +1,33 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { GraduationCap, Loader2 } from 'lucide-react';
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { useApplicantData } from '@/hooks/useApplicantData';
 import { useApplicantSubmit } from '@/hooks/useApplicantSubmit';
-import { APP_CONSTANTS, ApplicantFormData } from '@/constants';
+import { useApplicantFormData } from '@/hooks/useApplicantFormData';
+import FormHeader from './form/FormHeader';
+import FormLoadingState from './form/FormLoadingState';
+import FormErrorState from './form/FormErrorState';
 import ResponsiblePersonSection from './form/ResponsiblePersonSection';
 import ContactInfoSection from './form/ContactInfoSection';
-import PreparationDirectionsAccordion, { PreparationDirection } from './form/PreparationDirectionsAccordion';
+import PreparationDirectionsAccordion from './form/PreparationDirectionsAccordion';
 import StudyInfoSection from './form/StudyInfoSection';
 import AdditionalDetailsSection from './form/AdditionalDetailsSection';
 import ExamScoresSection from './form/ExamScoresSection';
+import SubmitButton from './form/SubmitButton';
 
 const ApplicantForm = () => {
   const { responsiblePersons, specializations, loading, error } = useApplicantData();
   const { submitApplicant, isSubmitting } = useApplicantSubmit();
-
-  const [formData, setFormData] = useState<ApplicantFormData>({
-    responsible_id: '',
-    full_name: '',
-    phone: '',
-    email: '',
-    specialization_ids: [],
-    study_form: '',
-    education_type: '',
-    budget: false,
-    stream: undefined,
-    gender: '',
-    citizenship: '',
-    is_adult: undefined,
-    disability: undefined,
-    education_document: '',
-    contact_person_name: '',
-    contact_person_phone: '',
-    how_did_you_know: '',
-    exam_type: '',
-    exam_scores: {},
-    entrance_subjects: []
-  });
-
-  const [preparationDirections, setPreparationDirections] = useState<PreparationDirection[]>([]);
+  const {
+    formData,
+    preparationDirections,
+    setPreparationDirections,
+    resetForm,
+    updateFormField,
+    handleExamScoreChange,
+    handleEntranceSubjectsChange,
+    handleEducationTypeChange
+  } = useApplicantFormData();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,86 +52,23 @@ const ApplicantForm = () => {
     const result = await submitApplicant(submitData);
     
     if (result.success) {
-      // Сброс формы
-      setFormData({
-        responsible_id: '',
-        full_name: '',
-        phone: '',
-        email: '',
-        specialization_ids: [],
-        study_form: '',
-        education_type: '',
-        budget: false,
-        stream: undefined,
-        gender: '',
-        citizenship: '',
-        is_adult: undefined,
-        disability: undefined,
-        education_document: '',
-        contact_person_name: '',
-        contact_person_phone: '',
-        how_did_you_know: '',
-        exam_type: '',
-        exam_scores: {},
-        entrance_subjects: []
-      });
-      setPreparationDirections([]);
+      resetForm();
     }
   };
 
-  const handleExamScoreChange = (subject: string, score: number) => {
-    setFormData(prev => ({
-      ...prev,
-      exam_scores: {
-        ...prev.exam_scores,
-        [subject]: score
-      }
-    }));
-  };
-
-  const handleEntranceSubjectsChange = (subjects: string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      entrance_subjects: subjects
-    }));
-  };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Загрузка данных...</span>
-        </div>
-      </div>
-    );
+    return <FormLoadingState />;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-red-600">{error}</div>
-      </div>
-    );
+    return <FormErrorState error={error} />;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-4xl mx-auto">
         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
-            <div className="flex items-center gap-3">
-              <GraduationCap className="h-8 w-8" />
-              <div>
-                <CardTitle className="text-2xl font-bold">
-                  Регистрация поступающего
-                </CardTitle>
-                <CardDescription className="text-blue-100">
-                  {APP_CONSTANTS.UNIVERSITY.FULL_NAME}
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
+          <FormHeader />
           
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -152,7 +76,7 @@ const ApplicantForm = () => {
               <ResponsiblePersonSection
                 selectedResponsibleId={formData.responsible_id}
                 responsiblePersons={responsiblePersons}
-                onResponsibleChange={(id) => setFormData(prev => ({ ...prev, responsible_id: id }))}
+                onResponsibleChange={(id) => updateFormField('responsible_id', id)}
               />
 
               {/* Контактная информация */}
@@ -160,9 +84,9 @@ const ApplicantForm = () => {
                 fullName={formData.full_name}
                 phone={formData.phone}
                 email={formData.email}
-                onFullNameChange={(value) => setFormData(prev => ({ ...prev, full_name: value }))}
-                onPhoneChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
-                onEmailChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
+                onFullNameChange={(value) => updateFormField('full_name', value)}
+                onPhoneChange={(value) => updateFormField('phone', value)}
+                onEmailChange={(value) => updateFormField('email', value)}
               />              
 
               {/* Информация об обучении */}
@@ -172,17 +96,9 @@ const ApplicantForm = () => {
                 studyForm={formData.study_form}
                 selectedSpecializationIds={formData.specialization_ids}
                 educationType={formData.education_type}
-                onStudyFormChange={(value) => setFormData(prev => ({ ...prev, study_form: value }))}
-                onEducationTypeChange={(value) => {
-                  setFormData(prev => ({ 
-                    ...prev, 
-                    education_type: value,
-                    specialization_ids: [],
-                    study_form: ''
-                  }));
-                  setPreparationDirections([]);
-                }}
-                onBudgetChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
+                onStudyFormChange={(value) => updateFormField('study_form', value)}
+                onEducationTypeChange={handleEducationTypeChange}
+                onBudgetChange={(value) => updateFormField('budget', value)}
               />
 
               {/* Направления подготовки */}
@@ -204,15 +120,15 @@ const ApplicantForm = () => {
                 contactPersonName={formData.contact_person_name}
                 contactPersonPhone={formData.contact_person_phone}
                 howDidYouKnow={formData.how_did_you_know}
-                onStreamChange={(value) => setFormData(prev => ({ ...prev, stream: value }))}
-                onGenderChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
-                onCitizenshipChange={(value) => setFormData(prev => ({ ...prev, citizenship: value }))}
-                onIsAdultChange={(value) => setFormData(prev => ({ ...prev, is_adult: value }))}
-                onDisabilityChange={(value) => setFormData(prev => ({ ...prev, disability: value }))}
-                onEducationDocumentChange={(value) => setFormData(prev => ({ ...prev, education_document: value }))}
-                onContactPersonNameChange={(value) => setFormData(prev => ({ ...prev, contact_person_name: value }))}
-                onContactPersonPhoneChange={(value) => setFormData(prev => ({ ...prev, contact_person_phone: value }))}
-                onHowDidYouKnowChange={(value) => setFormData(prev => ({ ...prev, how_did_you_know: value }))}
+                onStreamChange={(value) => updateFormField('stream', value)}
+                onGenderChange={(value) => updateFormField('gender', value)}
+                onCitizenshipChange={(value) => updateFormField('citizenship', value)}
+                onIsAdultChange={(value) => updateFormField('is_adult', value)}
+                onDisabilityChange={(value) => updateFormField('disability', value)}
+                onEducationDocumentChange={(value) => updateFormField('education_document', value)}
+                onContactPersonNameChange={(value) => updateFormField('contact_person_name', value)}
+                onContactPersonPhoneChange={(value) => updateFormField('contact_person_phone', value)}
+                onHowDidYouKnowChange={(value) => updateFormField('how_did_you_know', value)}
               />
 
               {/* ЕГЭ/ЦТ/Вступительные испытания */}
@@ -224,25 +140,12 @@ const ApplicantForm = () => {
                 selectedSpecializationIds={preparationDirections.map(d => d.specialization_id)}
                 specializations={specializations}
                 entranceSubjects={formData.entrance_subjects}
-                onExamTypeChange={(value) => setFormData(prev => ({ ...prev, exam_type: value }))}
+                onExamTypeChange={(value) => updateFormField('exam_type', value)}
                 onExamScoreChange={handleExamScoreChange}
                 onEntranceSubjectsChange={handleEntranceSubjectsChange}
               />
 
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 text-lg font-semibold shadow-lg"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                    Отправка...
-                  </>
-                ) : (
-                  'Подать заявку'
-                )}
-              </Button>
+              <SubmitButton isSubmitting={isSubmitting} />
             </form>
           </CardContent>
         </Card>
