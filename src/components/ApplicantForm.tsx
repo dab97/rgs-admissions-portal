@@ -9,8 +9,8 @@ import FormLoadingState from './form/FormLoadingState';
 import FormErrorState from './form/FormErrorState';
 import ResponsiblePersonSection from './form/ResponsiblePersonSection';
 import ContactInfoSection from './form/ContactInfoSection';
+import EducationTypeTabsSection from './form/EducationTypeTabsSection';
 import PreparationDirectionsAccordion from './form/PreparationDirectionsAccordion';
-import StudyInfoSection from './form/StudyInfoSection';
 import AdditionalDetailsSection from './form/AdditionalDetailsSection';
 import ExamScoresSection from './form/ExamScoresSection';
 import SubmitButton from './form/SubmitButton';
@@ -89,61 +89,55 @@ const ApplicantForm = () => {
                 onEmailChange={(value) => updateFormField('email', value)}
               />              
 
-              {/* Информация об обучении */}
-              <StudyInfoSection
-                specializations={specializations}
-                budget={formData.budget}
-                studyForm={formData.study_form}
-                selectedSpecializationIds={formData.specialization_ids}
+              {/* Вид образования с табами */}
+              <EducationTypeTabsSection
                 educationType={formData.education_type}
-                onStudyFormChange={(value) => updateFormField('study_form', value)}
                 onEducationTypeChange={handleEducationTypeChange}
-                onBudgetChange={(value) => updateFormField('budget', value)}
-              />
+              >
+                {/* Направления подготовки */}
+                <PreparationDirectionsAccordion
+                  directions={preparationDirections}
+                  specializations={specializations}
+                  educationType={formData.education_type}
+                  onDirectionsChange={setPreparationDirections}
+                />
 
-              {/* Направления подготовки */}
-              <PreparationDirectionsAccordion
-                directions={preparationDirections}
-                specializations={specializations}
-                educationType={formData.education_type}
-                onDirectionsChange={setPreparationDirections}
-              />
+                {/* Дополнительная информация */}
+                <AdditionalDetailsSection
+                  stream={formData.stream}
+                  gender={formData.gender}
+                  citizenship={formData.citizenship}
+                  isAdult={formData.is_adult}
+                  disability={formData.disability}
+                  educationDocument={formData.education_document}
+                  contactPersonName={formData.contact_person_name}
+                  contactPersonPhone={formData.contact_person_phone}
+                  howDidYouKnow={formData.how_did_you_know}
+                  onStreamChange={(value) => updateFormField('stream', value)}
+                  onGenderChange={(value) => updateFormField('gender', value)}
+                  onCitizenshipChange={(value) => updateFormField('citizenship', value)}
+                  onIsAdultChange={(value) => updateFormField('is_adult', value)}
+                  onDisabilityChange={(value) => updateFormField('disability', value)}
+                  onEducationDocumentChange={(value) => updateFormField('education_document', value)}
+                  onContactPersonNameChange={(value) => updateFormField('contact_person_name', value)}
+                  onContactPersonPhoneChange={(value) => updateFormField('contact_person_phone', value)}
+                  onHowDidYouKnowChange={(value) => updateFormField('how_did_you_know', value)}
+                />
 
-              {/* Дополнительная информация */}
-              <AdditionalDetailsSection
-                stream={formData.stream}
-                gender={formData.gender}
-                citizenship={formData.citizenship}
-                isAdult={formData.is_adult}
-                disability={formData.disability}
-                educationDocument={formData.education_document}
-                contactPersonName={formData.contact_person_name}
-                contactPersonPhone={formData.contact_person_phone}
-                howDidYouKnow={formData.how_did_you_know}
-                onStreamChange={(value) => updateFormField('stream', value)}
-                onGenderChange={(value) => updateFormField('gender', value)}
-                onCitizenshipChange={(value) => updateFormField('citizenship', value)}
-                onIsAdultChange={(value) => updateFormField('is_adult', value)}
-                onDisabilityChange={(value) => updateFormField('disability', value)}
-                onEducationDocumentChange={(value) => updateFormField('education_document', value)}
-                onContactPersonNameChange={(value) => updateFormField('contact_person_name', value)}
-                onContactPersonPhoneChange={(value) => updateFormField('contact_person_phone', value)}
-                onHowDidYouKnowChange={(value) => updateFormField('how_did_you_know', value)}
-              />
-
-              {/* ЕГЭ/ЦТ/Вступительные испытания */}
-              <ExamScoresSection
-                citizenship={formData.citizenship}
-                examType={formData.exam_type}
-                examScores={formData.exam_scores || {}}
-                budget={formData.budget}
-                selectedSpecializationIds={preparationDirections.map(d => d.specialization_id)}
-                specializations={specializations}
-                entranceSubjects={formData.entrance_subjects}
-                onExamTypeChange={(value) => updateFormField('exam_type', value)}
-                onExamScoreChange={handleExamScoreChange}
-                onEntranceSubjectsChange={handleEntranceSubjectsChange}
-              />
+                {/* ЕГЭ/ЦТ/Вступительные испытания */}
+                <ExamScoresSection
+                  citizenship={formData.citizenship}
+                  examType={formData.exam_type}
+                  examScores={formData.exam_scores || {}}
+                  budget={formData.budget}
+                  selectedSpecializationIds={preparationDirections.map(d => d.specialization_id)}
+                  specializations={specializations}
+                  entranceSubjects={formData.entrance_subjects}
+                  onExamTypeChange={(value) => updateFormField('exam_type', value)}
+                  onExamScoreChange={handleExamScoreChange}
+                  onEntranceSubjectsChange={handleEntranceSubjectsChange}
+                />
+              </EducationTypeTabsSection>
 
               <SubmitButton isSubmitting={isSubmitting} />
             </form>

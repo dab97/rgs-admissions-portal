@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApplicants, Applicant } from '@/hooks/useApplicants';
 import { useApplicantData } from '@/hooks/useApplicantData';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import ApplicantsTable from './applicants/ApplicantsTable';
+import ApplicantsFilters from './applicants/ApplicantsFilters';
 import ApplicantViewDialog from './applicants/ApplicantViewDialog';
 import ApplicantEditDialog from './applicants/ApplicantEditDialog';
 
@@ -15,6 +16,70 @@ const ApplicantsList = () => {
   const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+
+  // Состояние фильтров
+  const [filters, setFilters] = useState({
+    educationType: '',
+    studyForm: '',
+    specialization: '',
+    budget: '',
+    status: '',
+    search: ''
+  });
+
+  // Функция для изменения фильтров
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Функция для очистки фильтров
+  const handleClearFilters = () => {
+    setFilters({
+      educationType: '',
+      studyForm: '',
+      specialization: '',
+      budget: '',
+      status: '',
+      search: ''
+    });
+  };
+
+  // Фильтрация поступающих
+  const filteredApplicants = useMemo(() => {
+    return applicants.filter(applicant => {
+      // Поиск по ФИО
+      if (filters.search && !applicant.full_name.toLowerCase().includes(filters.search.toLowerCase())) {
+        return false;
+      }
+
+      // Фильтр по виду образования
+      if (filters.educationType && applicant.education_type !== filters.educationType) {
+        return false;
+      }
+
+      // Фильтр по форме обучения
+      if (filters.studyForm && applicant.study_form !== filters.studyForm) {
+        return false;
+      }
+
+      // Фильтр по специализации
+      if (filters.specialization && !applicant.specialization_ids?.includes(filters.specialization)) {
+        return false;
+      }
+
+      // Фильтр по бюджету
+      if (filters.budget && applicant.budget.toString() !== filters.budget) {
+        return false;
+      }
+
+      // Фильтр по статусу
+      if (filters.status && applicant.status !== filters.status) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [applicants, filters]);
 
   const handleEdit = (applicant: Applicant) => {
     setEditingApplicant({
@@ -87,14 +152,21 @@ const ApplicantsList = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Список поступающих</CardTitle>
+          <CardTitle>Список поступающих ({filteredApplicants.length})</CardTitle>
           <CardDescription>
             Управление заявками поступающих абитуриентов
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <ApplicantsFilters
+            specializations={specializations}
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters}
+          />
+          
           <ApplicantsTable
-            applicants={applicants}
+            applicants={filteredApplicants}
             onView={handleView}
             onEdit={handleEdit}
             onDelete={handleDelete}

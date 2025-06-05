@@ -1,12 +1,33 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ChartData {
-  specializationData: Array<{ name: string; value: number; color: string }>;
+  specializationData: Array<{ 
+    name: string; 
+    total: number;
+    budget: number;
+    paid: number;
+    fullTime: number;
+    partTime: number;
+    distance: number;
+    color: string;
+  }>;
   monthlyData: Array<{ month: string; applications: number; approved: number }>;
   budgetData: Array<{ name: string; value: number; color: string }>;
   studyFormData: Array<{ name: string; value: number; color: string }>;
+  educationTypeData: Array<{ name: string; value: number; color: string }>;
+  detailedStats: {
+    bySpecialization: Record<string, {
+      total: number;
+      budget: number;
+      paid: number;
+      fullTime: number;
+      partTime: number;
+      distance: number;
+      bachelor: number;
+      master: number;
+    }>;
+  };
   loading: boolean;
   error: string | null;
 }
@@ -17,6 +38,10 @@ export const useChartsData = () => {
     monthlyData: [],
     budgetData: [],
     studyFormData: [],
+    educationTypeData: [],
+    detailedStats: {
+      bySpecialization: {}
+    },
     loading: true,
     error: null
   });
@@ -46,23 +71,85 @@ export const useChartsData = () => {
 
         if (specializationsError) throw specializationsError;
 
-        // Подсчет по специализациям
-        const specializationCounts: { [key: string]: number } = {};
+        // Детальная статистика по специализациям
+        const detailedStats: Record<string, any> = {};
+        const specializationCounts: Record<string, any> = {};
+
+        specializations?.forEach(spec => {
+          detailedStats[spec.name] = {
+            total: 0,
+            budget: 0,
+            paid: 0,
+            fullTime: 0,
+            partTime: 0,
+            distance: 0,
+            bachelor: 0,
+            master: 0
+          };
+          specializationCounts[spec.name] = {
+            total: 0,
+            budget: 0,
+            paid: 0,
+            fullTime: 0,
+            partTime: 0,
+            distance: 0
+          };
+        });
+
         applicants?.forEach(applicant => {
           applicant.applicant_specializations?.forEach((as: any) => {
             const specName = as.specializations?.name;
-            if (specName) {
-              specializationCounts[specName] = (specializationCounts[specName] || 0) + 1;
+            if (specName && detailedStats[specName]) {
+              detailedStats[specName].total++;
+              specializationCounts[specName].total++;
+
+              if (applicant.budget) {
+                detailedStats[specName].budget++;
+                specializationCounts[specName].budget++;
+              } else {
+                detailedStats[specName].paid++;
+                specializationCounts[specName].paid++;
+              }
+
+              if (applicant.study_form === 'full-time') {
+                detailedStats[specName].fullTime++;
+                specializationCounts[specName].fullTime++;
+              } else if (applicant.study_form === 'part-time') {
+                detailedStats[specName].partTime++;
+                specializationCounts[specName].partTime++;
+              } else if (applicant.study_form === 'distance') {
+                detailedStats[specName].distance++;
+                specializationCounts[specName].distance++;
+              }
+
+              if (applicant.education_type === 'bachelor') {
+                detailedStats[specName].bachelor++;
+              } else if (applicant.education_type === 'master') {
+                detailedStats[specName].master++;
+              }
             }
           });
         });
 
         const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#84cc16', '#ec4899', '#f97316', '#6366f1'];
-        const specializationData = Object.entries(specializationCounts).map(([name, value], index) => ({
+        const specializationData = Object.entries(specializationCounts).map(([name, counts], index) => ({
           name,
-          value,
+          total: counts.total,
+          budget: counts.budget,
+          paid: counts.paid,
+          fullTime: counts.fullTime,
+          partTime: counts.partTime,
+          distance: counts.distance,
           color: colors[index % colors.length]
         }));
+
+        // Данные по виду образования
+        const bachelorCount = applicants?.filter(app => app.education_type === 'bachelor').length || 0;
+        const masterCount = applicants?.filter(app => app.education_type === 'master').length || 0;
+        const educationTypeData = [
+          { name: 'Бакалавриат', value: bachelorCount, color: '#3b82f6' },
+          { name: 'Магистратура', value: masterCount, color: '#8b5cf6' },
+        ];
 
         // Данные по месяцам (примерные)
         const monthlyData = [
@@ -101,6 +188,10 @@ export const useChartsData = () => {
           monthlyData,
           budgetData,
           studyFormData,
+          educationTypeData,
+          detailedStats: {
+            bySpecialization: detailedStats
+          },
           loading: false,
           error: null
         });
