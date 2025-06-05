@@ -34,16 +34,16 @@ const ApplicantEditDialog = ({
 
   useEffect(() => {
     if (applicant) {
-      // Преобразуем данные поступающего в направления подготовки
+      // Преобразуем данные поступающего в одно направление подготовки
       if (applicant.specialization_ids && applicant.specialization_ids.length > 0) {
-        const directions = applicant.specialization_ids.map((specId, index) => ({
-          id: `direction-${specId}`,
+        const direction = {
+          id: `direction-${applicant.specialization_ids[0]}`,
           budget: applicant.budget || false,
           study_form: applicant.study_form || '',
-          specialization_id: specId,
-          priority: index + 1
-        }));
-        setPreparationDirections(directions);
+          specialization_id: applicant.specialization_ids[0],
+          priority: 1
+        };
+        setPreparationDirections([direction]);
       } else {
         setPreparationDirections([]);
       }
@@ -52,14 +52,20 @@ const ApplicantEditDialog = ({
 
   const handleDirectionsChange = (directions: PreparationDirection[]) => {
     setPreparationDirections(directions);
-    if (applicant) {
-      const specializationIds = directions.map(d => d.specialization_id);
-      const hasAnyBudget = directions.some(d => d.budget);
+    if (applicant && directions.length > 0) {
+      const direction = directions[0];
       onApplicantChange({
         ...applicant,
-        specialization_ids: specializationIds,
-        budget: hasAnyBudget,
-        study_form: directions[0]?.study_form || ''
+        specialization_ids: [direction.specialization_id],
+        budget: direction.budget,
+        study_form: direction.study_form
+      });
+    } else if (applicant) {
+      onApplicantChange({
+        ...applicant,
+        specialization_ids: [],
+        budget: false,
+        study_form: ''
       });
     }
   };
@@ -85,7 +91,7 @@ const ApplicantEditDialog = ({
             onApplicantChange={onApplicantChange}
           />
           
-          {/* Направления подготовки */}
+          {/* Направление подготовки */}
           <div>
             <PreparationDirectionsAccordion
               directions={preparationDirections}

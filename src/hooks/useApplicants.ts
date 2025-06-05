@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -92,7 +91,7 @@ export const useApplicants = () => {
 
       if (updateError) throw updateError;
 
-      // Если есть изменения в специализациях, обновляем их
+      // Если есть изменения в специализации, обновляем её
       if (specialization_ids !== undefined) {
         // Удаляем старые связи
         const { error: deleteError } = await supabase
@@ -102,17 +101,15 @@ export const useApplicants = () => {
 
         if (deleteError) throw deleteError;
 
-        // Добавляем новые связи
+        // Добавляем новую связь (только одну)
         if (specialization_ids.length > 0) {
-          const specializationInserts = specialization_ids.map((specId, index) => ({
-            applicant_id: id,
-            specialization_id: specId,
-            priority: index + 1
-          }));
-
           const { error: insertError } = await supabase
             .from('applicant_specializations')
-            .insert(specializationInserts);
+            .insert({
+              applicant_id: id,
+              specialization_id: specialization_ids[0],
+              priority: 1
+            });
 
           if (insertError) throw insertError;
         }

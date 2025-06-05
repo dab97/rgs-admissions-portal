@@ -37,16 +37,17 @@ const ApplicantForm = () => {
       return;
     }
 
-    // Преобразуем направления подготовки в формат для отправки
-    const specializationIds = preparationDirections.map(d => d.specialization_id);
-    const hasAnyBudget = preparationDirections.some(d => d.budget);
+    // Берем данные из единственного направления
+    const direction = preparationDirections[0];
+    if (!direction || !direction.specialization_id || !direction.study_form) {
+      return;
+    }
 
     const submitData = {
       ...formData,
-      specialization_ids: specializationIds,
-      budget: hasAnyBudget,
-      study_form: preparationDirections[0]?.study_form || '',
-      preparation_directions: preparationDirections
+      specialization_ids: [direction.specialization_id],
+      budget: direction.budget,
+      study_form: direction.study_form
     };
 
     const result = await submitApplicant(submitData);
@@ -94,7 +95,7 @@ const ApplicantForm = () => {
                 educationType={formData.education_type}
                 onEducationTypeChange={handleEducationTypeChange}
               >
-                {/* Направления подготовки */}
+                {/* Направление подготовки */}
                 <PreparationDirectionsAccordion
                   directions={preparationDirections}
                   specializations={specializations}
@@ -129,7 +130,7 @@ const ApplicantForm = () => {
                   citizenship={formData.citizenship}
                   examType={formData.exam_type}
                   examScores={formData.exam_scores || {}}
-                  budget={formData.budget}
+                  budget={preparationDirections[0]?.budget || false}
                   selectedSpecializationIds={preparationDirections.map(d => d.specialization_id)}
                   specializations={specializations}
                   entranceSubjects={formData.entrance_subjects}

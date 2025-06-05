@@ -37,8 +37,7 @@ export const useApplicantSubmit = () => {
           exam_type: formData.exam_type,
           exam_scores: examScoresJson,
           entrance_subjects: formData.entrance_subjects,
-          status: 'pending',
-          preparation_directions: formData.preparation_directions || null
+          status: 'pending'
         })
         .select()
         .single();
@@ -49,21 +48,19 @@ export const useApplicantSubmit = () => {
         return { success: false, error };
       }
 
-      // Insert specializations
+      // Insert single specialization
       if (formData.specialization_ids.length > 0) {
-        const specializationInserts = formData.specialization_ids.map((specializationId, index) => ({
-          applicant_id: data.id,
-          specialization_id: specializationId,
-          priority: index + 1
-        }));
-
         const { error: specializationError } = await supabase
           .from('applicant_specializations')
-          .insert(specializationInserts);
+          .insert({
+            applicant_id: data.id,
+            specialization_id: formData.specialization_ids[0],
+            priority: 1
+          });
 
         if (specializationError) {
-          console.error('Error inserting specializations:', specializationError);
-          toast.error('Ошибка при добавлении специализаций');
+          console.error('Error inserting specialization:', specializationError);
+          toast.error('Ошибка при добавлении специализации');
           return { success: false, error: specializationError };
         }
       }
