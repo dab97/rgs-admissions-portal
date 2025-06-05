@@ -31,6 +31,7 @@ export interface Applicant {
   responsible_persons: { name: string } | null;
   specializations: string[];
   specialization_ids?: string[];
+  preparation_directions?: any[];
 }
 
 export const useApplicants = () => {
@@ -47,7 +48,8 @@ export const useApplicants = () => {
           *,
           responsible_persons (name),
           applicant_specializations (
-            specializations (id, name)
+            specializations (id, name),
+            priority
           )
         `)
         .order('created_at', { ascending: false });
@@ -56,12 +58,14 @@ export const useApplicants = () => {
 
       const formattedApplicants = data?.map(applicant => ({
         ...applicant,
-        specializations: applicant.applicant_specializations?.map((as: any) => 
-          as.specializations?.name
-        ).filter(Boolean) || [],
-        specialization_ids: applicant.applicant_specializations?.map((as: any) => 
-          as.specializations?.id
-        ).filter(Boolean) || [],
+        specializations: applicant.applicant_specializations
+          ?.sort((a: any, b: any) => (a.priority || 0) - (b.priority || 0))
+          ?.map((as: any) => as.specializations?.name)
+          ?.filter(Boolean) || [],
+        specialization_ids: applicant.applicant_specializations
+          ?.sort((a: any, b: any) => (a.priority || 0) - (b.priority || 0))
+          ?.map((as: any) => as.specializations?.id)
+          ?.filter(Boolean) || [],
         exam_type: applicant.exam_type || null,
         exam_scores: applicant.exam_scores || null,
         entrance_subjects: applicant.entrance_subjects || null
@@ -100,9 +104,10 @@ export const useApplicants = () => {
 
         // Добавляем новые связи
         if (specialization_ids.length > 0) {
-          const specializationInserts = specialization_ids.map(specId => ({
+          const specializationInserts = specialization_ids.map((specId, index) => ({
             applicant_id: id,
-            specialization_id: specId
+            specialization_id: specId,
+            priority: index + 1
           }));
 
           const { error: insertError } = await supabase

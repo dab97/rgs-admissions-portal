@@ -7,7 +7,7 @@ import { ApplicantFormData } from '@/constants';
 export const useApplicantSubmit = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submitApplicant = async (formData: ApplicantFormData) => {
+  const submitApplicant = async (formData: ApplicantFormData & { preparation_directions?: any[] }) => {
     setIsSubmitting(true);
     
     try {
@@ -18,7 +18,7 @@ export const useApplicantSubmit = () => {
       const { data, error } = await supabase
         .from('applicants')
         .insert({
-          responsible_id: formData.responsible_id, // Fixed: use responsible_id instead of responsible_person_id
+          responsible_id: formData.responsible_id,
           full_name: formData.full_name,
           phone: formData.phone,
           email: formData.email,
@@ -37,7 +37,8 @@ export const useApplicantSubmit = () => {
           exam_type: formData.exam_type,
           exam_scores: examScoresJson,
           entrance_subjects: formData.entrance_subjects,
-          status: 'pending'
+          status: 'pending',
+          preparation_directions: formData.preparation_directions || null
         })
         .select()
         .single();
@@ -50,9 +51,10 @@ export const useApplicantSubmit = () => {
 
       // Insert specializations
       if (formData.specialization_ids.length > 0) {
-        const specializationInserts = formData.specialization_ids.map(specializationId => ({
+        const specializationInserts = formData.specialization_ids.map((specializationId, index) => ({
           applicant_id: data.id,
-          specialization_id: specializationId
+          specialization_id: specializationId,
+          priority: index + 1
         }));
 
         const { error: specializationError } = await supabase
