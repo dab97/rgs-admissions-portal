@@ -1,28 +1,15 @@
 
 import React, { useState } from 'react';
-import { useApplicants } from '@/hooks/useApplicants';
+import { useApplicants, Applicant } from '@/hooks/useApplicants';
 import { useApplicantData } from '@/hooks/useApplicantData';
-import { Applicant } from '@/types/applicant';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import ApplicantsTable from './applicants/ApplicantsTable';
-import ApplicantsFilters from './applicants/ApplicantsFilters';
 import ApplicantViewDialog from './applicants/ApplicantViewDialog';
 import ApplicantEditDialog from './applicants/ApplicantEditDialog';
 
 const ApplicantsList = () => {
-  const { 
-    applicants, 
-    loading, 
-    updateApplicant, 
-    deleteApplicant,
-    sortField,
-    sortDirection,
-    filters,
-    handleSort,
-    handleFilterChange,
-    clearFilters
-  } = useApplicants();
+  const { applicants, loading, updateApplicant, deleteApplicant } = useApplicants();
   const { responsiblePersons, specializations } = useApplicantData();
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
   const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(null);
@@ -30,21 +17,9 @@ const ApplicantsList = () => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   const handleEdit = (applicant: Applicant) => {
-    // Преобразуем старый формат в новый формат направлений подготовки
-    const preparationDirections = applicant.preparation_directions && applicant.preparation_directions.length > 0
-      ? applicant.preparation_directions
-      : [{
-          id: 'legacy-direction',
-          budget: applicant.budget,
-          studyForm: applicant.study_form,
-          specializationIds: applicant.specialization_ids || [],
-          priority: 1
-        }];
-
     setEditingApplicant({
       ...applicant,
-      specialization_ids: applicant.specialization_ids || [],
-      preparation_directions: preparationDirections
+      specialization_ids: applicant.specialization_ids || []
     });
     setIsEditDialogOpen(true);
   };
@@ -57,7 +32,6 @@ const ApplicantsList = () => {
   const handleSave = async () => {
     if (!editingApplicant) return;
 
-    // Используем новую структуру данных с несколькими направлениями подготовки
     await updateApplicant(editingApplicant.id, {
       status: editingApplicant.status,
       admin_notes: editingApplicant.admin_notes,
@@ -65,7 +39,9 @@ const ApplicantsList = () => {
       phone: editingApplicant.phone,
       email: editingApplicant.email,
       responsible_id: editingApplicant.responsible_id,
+      study_form: editingApplicant.study_form,
       education_type: editingApplicant.education_type,
+      budget: editingApplicant.budget,
       stream: editingApplicant.stream,
       gender: editingApplicant.gender,
       citizenship: editingApplicant.citizenship,
@@ -78,7 +54,7 @@ const ApplicantsList = () => {
       exam_type: editingApplicant.exam_type,
       exam_scores: editingApplicant.exam_scores,
       entrance_subjects: editingApplicant.entrance_subjects,
-      preparation_directions: editingApplicant.preparation_directions
+      specialization_ids: editingApplicant.specialization_ids
     });
 
     setIsEditDialogOpen(false);
@@ -116,21 +92,12 @@ const ApplicantsList = () => {
             Управление заявками поступающих абитуриентов
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <ApplicantsFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onClearFilters={clearFilters}
-          />
-          
+        <CardContent>
           <ApplicantsTable
             applicants={applicants}
             onView={handleView}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={handleSort}
           />
         </CardContent>
       </Card>
@@ -139,7 +106,6 @@ const ApplicantsList = () => {
         isOpen={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         applicant={selectedApplicant}
-        specializations={specializations}
       />
 
       <ApplicantEditDialog

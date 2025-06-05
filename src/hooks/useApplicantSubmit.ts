@@ -3,16 +3,11 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ApplicantFormData } from '@/constants';
-import { PreparationDirection } from '@/components/form/PreparationDirectionsSection';
-
-interface SubmitFormData extends ApplicantFormData {
-  preparation_directions?: PreparationDirection[];
-}
 
 export const useApplicantSubmit = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submitApplicant = async (formData: SubmitFormData) => {
+  const submitApplicant = async (formData: ApplicantFormData) => {
     setIsSubmitting(true);
     
     try {
@@ -20,19 +15,16 @@ export const useApplicantSubmit = () => {
       const examScoresJson = formData.exam_scores ? 
         Object.fromEntries(Object.entries(formData.exam_scores)) : {};
 
-      // Извлекаем данные из первого направления для совместимости с БД
-      const primaryDirection = formData.preparation_directions?.[0];
-      
       const { data, error } = await supabase
         .from('applicants')
         .insert({
-          responsible_id: formData.responsible_id,
+          responsible_id: formData.responsible_id, // Fixed: use responsible_id instead of responsible_person_id
           full_name: formData.full_name,
           phone: formData.phone,
           email: formData.email,
-          study_form: primaryDirection?.studyForm || formData.study_form,
+          study_form: formData.study_form,
           education_type: formData.education_type,
-          budget: primaryDirection?.budget ?? formData.budget,
+          budget: formData.budget,
           stream: formData.stream,
           gender: formData.gender,
           citizenship: formData.citizenship,
@@ -56,30 +48,21 @@ export const useApplicantSubmit = () => {
         return { success: false, error };
       }
 
-      // Insert specializations from all preparation directions
-      if (formData.preparation_directions && formData.preparation_directions.length > 0) {
-        const allSpecializationIds = formData.preparation_directions.reduce((acc, direction) => {
-          return [...acc, ...direction.specializationIds];
-        }, [] as string[]);
-        
-        // Удаляем дубликаты
-        const uniqueSpecializationIds = [...new Set(allSpecializationIds)];
-        
-        if (uniqueSpecializationIds.length > 0) {
-          const specializationInserts = uniqueSpecializationIds.map(specializationId => ({
-            applicant_id: data.id,
-            specialization_id: specializationId
-          }));
+      // Insert specializations
+      if (formData.specialization_ids.length > 0) {
+        const specializationInserts = formData.specialization_ids.map(specializationId => ({
+          applicant_id: data.id,
+          specialization_id: specializationId
+        }));
 
-          const { error: specializationError } = await supabase
-            .from('applicant_specializations')
-            .insert(specializationInserts);
+        const { error: specializationError } = await supabase
+          .from('applicant_specializations')
+          .insert(specializationInserts);
 
-          if (specializationError) {
-            console.error('Error inserting specializations:', specializationError);
-            toast.error('Ошибка при добавлении специализаций');
-            return { success: false, error: specializationError };
-          }
+        if (specializationError) {
+          console.error('Error inserting specializations:', specializationError);
+          toast.error('Ошибка при добавлении специализаций');
+          return { success: false, error: specializationError };
         }
       }
 
