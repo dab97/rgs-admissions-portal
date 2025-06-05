@@ -1,10 +1,9 @@
-
 // Константы для приложения учета абитуриентов
 export const APP_CONSTANTS = {
   // Формы обучения
   STUDY_FORMS: [
-    { value: 'full-time', label: 'Очная' },
-    { value: 'part-time', label: 'Очно-Заочная' },
+    { value: 'full_time', label: 'Очная' },
+    { value: 'part_time', label: 'Очно-заочная' },
     { value: 'distance', label: 'Заочная' }
   ],
 
@@ -19,17 +18,17 @@ export const APP_CONSTANTS = {
     bachelor: {
       available: ['psychology', 'management', 'social_work', 'law'],
       studyFormRestrictions: {
-        psychology: ['full-time', 'part-time'], // нет заочной
-        management: ['full-time'], // только очная
-        social_work: ['full-time', 'distance'], // очная и заочная
-        law: ['full-time'] // только очная
+        psychology: ['full_time', 'part_time'], // нет заочной
+        management: ['full_time'], // только очная
+        social_work: ['full_time', 'distance'], // очная и заочная
+        law: ['full_time'] // только очная
       }
     },
     master: {
       available: ['management', 'psychology'],
       studyFormRestrictions: {
         management: ['distance'], // только заочная
-        psychology: ['part-time'] // только очно-заочная
+        psychology: ['part_time'] // только очно-заочная
       }
     }
   },
@@ -160,7 +159,7 @@ export interface ResponsiblePerson {
 export interface Specialization {
   id: string;
   name: string;
-  code?: string; // добавляем код для идентификации
+  code?: string;
 }
 
 export interface ExamScores {

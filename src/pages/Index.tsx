@@ -4,7 +4,7 @@ import ApplicantForm from '@/components/ApplicantForm';
 import LoginForm from '@/components/LoginForm';
 import AdminDashboard from '@/pages/AdminDashboard';
 import { Button } from '@/components/ui/button';
-import { Shield, Users, GraduationCap } from 'lucide-react';
+import { Shield, Users } from 'lucide-react';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<'form' | 'login' | 'admin'>('form');
