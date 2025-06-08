@@ -2,7 +2,6 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Applicant } from '@/hooks/useApplicants';
 import { APP_CONSTANTS } from '@/constants';
 
@@ -14,52 +13,6 @@ interface EducationSectionProps {
 const EducationSection = ({ applicant, onApplicantChange }: EducationSectionProps) => {
   return (
     <>
-      {/* Форма обучения и образование */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Форма обучения</Label>
-          <Select
-            value={applicant.study_form}
-            onValueChange={(value) => onApplicantChange({
-              ...applicant,
-              study_form: value
-            })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {APP_CONSTANTS.STUDY_FORMS.map((form) => (
-                <SelectItem key={form.value} value={form.value}>
-                  {form.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Вид образования</Label>
-          <Select
-            value={applicant.education_type}
-            onValueChange={(value) => onApplicantChange({
-              ...applicant,
-              education_type: value
-            })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {APP_CONSTANTS.EDUCATION_TYPES.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       {/* Документ об образовании */}
       <div>
         <Label>Документ об образовании</Label>
@@ -84,26 +37,7 @@ const EducationSection = ({ applicant, onApplicantChange }: EducationSectionProp
       </div>
 
       {/* Дополнительные поля */}
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <Label>Бюджет</Label>
-          <RadioGroup 
-            value={applicant.budget.toString()}
-            onValueChange={(value) => onApplicantChange({
-              ...applicant,
-              budget: value === 'true'
-            })}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="true" id="edit_budget_yes" />
-              <Label htmlFor="edit_budget_yes">Да</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="false" id="edit_budget_no" />
-              <Label htmlFor="edit_budget_no">Нет</Label>
-            </div>
-          </RadioGroup>
-        </div>
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Пол</Label>
           <Select

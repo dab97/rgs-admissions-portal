@@ -3,36 +3,20 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Applicant } from '@/hooks/useApplicants';
-import { ResponsiblePerson, Specialization } from '@/constants';
+import { ResponsiblePerson } from '@/constants';
 
 interface BasicInfoSectionProps {
   applicant: Applicant;
   onApplicantChange: (applicant: Applicant) => void;
   responsiblePersons: ResponsiblePerson[];
-  specializations: Specialization[];
 }
 
 const BasicInfoSection = ({ 
   applicant, 
   onApplicantChange, 
-  responsiblePersons, 
-  specializations 
+  responsiblePersons
 }: BasicInfoSectionProps) => {
-  const handleSpecializationChange = (specializationId: string, checked: boolean) => {
-    const currentIds = Array.isArray(applicant.specialization_ids) 
-      ? applicant.specialization_ids 
-      : [];
-    
-    onApplicantChange({
-      ...applicant,
-      specialization_ids: checked 
-        ? [...currentIds, specializationId]
-        : currentIds.filter(id => id !== specializationId)
-    });
-  };
-
   return (
     <>
       {/* Основная информация */}
@@ -108,25 +92,6 @@ const BasicInfoSection = ({
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      {/* Специализации */}
-      <div>
-        <Label>Специализации</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {specializations.map((spec) => (
-            <div key={spec.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={`edit_spec_${spec.id}`}
-                checked={Array.isArray(applicant.specialization_ids) && applicant.specialization_ids.includes(spec.id)}
-                onCheckedChange={(checked) => handleSpecializationChange(spec.id, checked as boolean)}
-              />
-              <Label htmlFor={`edit_spec_${spec.id}`} className="text-sm">
-                {spec.name}
-              </Label>
-            </div>
-          ))}
-        </div>
       </div>
     </>
   );

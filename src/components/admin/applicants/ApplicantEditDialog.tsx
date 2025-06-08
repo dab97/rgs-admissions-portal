@@ -83,7 +83,6 @@ const ApplicantEditDialog = ({
             applicant={applicant}
             onApplicantChange={onApplicantChange}
             responsiblePersons={responsiblePersons}
-            specializations={specializations}
           />
           
           <EducationSection
