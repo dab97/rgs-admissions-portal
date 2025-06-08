@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -41,28 +42,31 @@ export const useApplicants = () => {
 
   const fetchApplicants = async () => {
     try {
+      console.log('Fetching applicants...');
       const { data, error } = await supabase
         .from('applicants')
         .select(`
           *,
           responsible_persons (name),
           applicant_specializations (
-            specializations (id, name),
-            priority
+            specializations (id, name)
           )
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Raw applicants data:', data);
 
       const formattedApplicants = data?.map(applicant => ({
         ...applicant,
         specializations: applicant.applicant_specializations
-          ?.sort((a: any, b: any) => (a.priority || 0) - (b.priority || 0))
           ?.map((as: any) => as.specializations?.name)
           ?.filter(Boolean) || [],
         specialization_ids: applicant.applicant_specializations
-          ?.sort((a: any, b: any) => (a.priority || 0) - (b.priority || 0))
           ?.map((as: any) => as.specializations?.id)
           ?.filter(Boolean) || [],
         exam_type: applicant.exam_type || null,
@@ -70,10 +74,17 @@ export const useApplicants = () => {
         entrance_subjects: applicant.entrance_subjects || null
       })) || [];
 
+      console.log('Formatted applicants:', formattedApplicants);
       setApplicants(formattedApplicants);
+      setError(null);
     } catch (err) {
       console.error('Error fetching applicants:', err);
       setError('Ошибка загрузки списка поступающих');
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось загрузить список поступающих',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -107,8 +118,7 @@ export const useApplicants = () => {
             .from('applicant_specializations')
             .insert({
               applicant_id: id,
-              specialization_id: specialization_ids[0],
-              priority: 1
+              specialization_id: specialization_ids[0]
             });
 
           if (insertError) throw insertError;

@@ -53,7 +53,10 @@ const ApplicantsFilters = ({
         />
 
         {/* Вид образования */}
-        <Select value={filters.educationType} onValueChange={(value) => onFilterChange('educationType', value === 'all' ? '' : value)}>
+        <Select 
+          value={filters.educationType || 'all'} 
+          onValueChange={(value) => onFilterChange('educationType', value === 'all' ? '' : value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Вид образования" />
           </SelectTrigger>
@@ -68,7 +71,10 @@ const ApplicantsFilters = ({
         </Select>
 
         {/* Форма обучения */}
-        <Select value={filters.studyForm} onValueChange={(value) => onFilterChange('studyForm', value === 'all' ? '' : value)}>
+        <Select 
+          value={filters.studyForm || 'all'} 
+          onValueChange={(value) => onFilterChange('studyForm', value === 'all' ? '' : value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Форма обучения" />
           </SelectTrigger>
@@ -83,7 +89,10 @@ const ApplicantsFilters = ({
         </Select>
 
         {/* Специализация */}
-        <Select value={filters.specialization} onValueChange={(value) => onFilterChange('specialization', value === 'all' ? '' : value)}>
+        <Select 
+          value={filters.specialization || 'all'} 
+          onValueChange={(value) => onFilterChange('specialization', value === 'all' ? '' : value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Специализация" />
           </SelectTrigger>
@@ -98,7 +107,10 @@ const ApplicantsFilters = ({
         </Select>
 
         {/* Бюджет */}
-        <Select value={filters.budget} onValueChange={(value) => onFilterChange('budget', value === 'all' ? '' : value)}>
+        <Select 
+          value={filters.budget || 'all'} 
+          onValueChange={(value) => onFilterChange('budget', value === 'all' ? '' : value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Бюджет" />
           </SelectTrigger>
@@ -110,7 +122,10 @@ const ApplicantsFilters = ({
         </Select>
 
         {/* Статус */}
-        <Select value={filters.status} onValueChange={(value) => onFilterChange('status', value === 'all' ? '' : value)}>
+        <Select 
+          value={filters.status || 'all'} 
+          onValueChange={(value) => onFilterChange('status', value === 'all' ? '' : value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Статус" />
           </SelectTrigger>
