@@ -12,7 +12,7 @@ interface EducationSectionProps {
 
 const EducationSection = ({ applicant, onApplicantChange }: EducationSectionProps) => {
   return (
-    <>
+    <div className="space-y-4">
       {/* Документ об образовании */}
       <div>
         <Label>Документ об образовании</Label>
@@ -81,7 +81,7 @@ const EducationSection = ({ applicant, onApplicantChange }: EducationSectionProp
           </Select>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

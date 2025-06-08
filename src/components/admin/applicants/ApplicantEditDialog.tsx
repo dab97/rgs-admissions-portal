@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Applicant } from '@/hooks/useApplicants';
 import { ResponsiblePerson, Specialization } from '@/constants';
 import BasicInfoSection from './sections/BasicInfoSection';
+import EducationTypeSection from './sections/EducationTypeSection';
 import EducationSection from './sections/EducationSection';
 import AdditionalInfoSection from './sections/AdditionalInfoSection';
 import StatusSection from './sections/StatusSection';
@@ -34,7 +35,8 @@ const ApplicantEditDialog = ({
 
   useEffect(() => {
     if (applicant) {
-      // Преобразуем данные поступающего в одно направление подготовки
+      console.log('Setting up preparation directions for applicant:', applicant);
+      // Преобразуем данные поступающего в направление подготовки
       if (applicant.specialization_ids && applicant.specialization_ids.length > 0) {
         const direction = {
           id: `direction-${applicant.specialization_ids[0]}`,
@@ -43,17 +45,21 @@ const ApplicantEditDialog = ({
           specialization_id: applicant.specialization_ids[0],
           priority: 1
         };
+        console.log('Created direction:', direction);
         setPreparationDirections([direction]);
       } else {
+        console.log('No specialization IDs found, clearing directions');
         setPreparationDirections([]);
       }
     }
   }, [applicant]);
 
   const handleDirectionsChange = (directions: PreparationDirection[]) => {
+    console.log('Directions changed:', directions);
     setPreparationDirections(directions);
     if (applicant && directions.length > 0) {
       const direction = directions[0];
+      console.log('Updating applicant with direction:', direction);
       onApplicantChange({
         ...applicant,
         specialization_ids: [direction.specialization_id],
@@ -61,6 +67,7 @@ const ApplicantEditDialog = ({
         study_form: direction.study_form
       });
     } else if (applicant) {
+      console.log('Clearing applicant specialization data');
       onApplicantChange({
         ...applicant,
         specialization_ids: [],
@@ -85,20 +92,28 @@ const ApplicantEditDialog = ({
             responsiblePersons={responsiblePersons}
           />
           
-          <EducationSection
+          {/* Вид образования - теперь выше специализации */}
+          <EducationTypeSection
             applicant={applicant}
             onApplicantChange={onApplicantChange}
           />
           
-          {/* Направление подготовки */}
-          <div>
-            <PreparationDirectionsAccordion
-              directions={preparationDirections}
-              specializations={specializations}
-              educationType={applicant.education_type}
-              onDirectionsChange={handleDirectionsChange}
-            />
-          </div>
+          {/* Направление подготовки - только если выбран тип образования */}
+          {applicant.education_type && (
+            <div>
+              <PreparationDirectionsAccordion
+                directions={preparationDirections}
+                specializations={specializations}
+                educationType={applicant.education_type}
+                onDirectionsChange={handleDirectionsChange}
+              />
+            </div>
+          )}
+          
+          <EducationSection
+            applicant={applicant}
+            onApplicantChange={onApplicantChange}
+          />
           
           <AdditionalInfoSection
             applicant={applicant}
