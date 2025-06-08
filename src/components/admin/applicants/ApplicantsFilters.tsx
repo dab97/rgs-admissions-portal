@@ -53,12 +53,12 @@ const ApplicantsFilters = ({
         />
 
         {/* Вид образования */}
-        <Select value={filters.educationType} onValueChange={(value) => onFilterChange('educationType', value)}>
+        <Select value={filters.educationType} onValueChange={(value) => onFilterChange('educationType', value === 'all' ? '' : value)}>
           <SelectTrigger>
             <SelectValue placeholder="Вид образования" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Все</SelectItem>
+            <SelectItem value="all">Все</SelectItem>
             {APP_CONSTANTS.EDUCATION_TYPES.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.label}
@@ -68,12 +68,12 @@ const ApplicantsFilters = ({
         </Select>
 
         {/* Форма обучения */}
-        <Select value={filters.studyForm} onValueChange={(value) => onFilterChange('studyForm', value)}>
+        <Select value={filters.studyForm} onValueChange={(value) => onFilterChange('studyForm', value === 'all' ? '' : value)}>
           <SelectTrigger>
             <SelectValue placeholder="Форма обучения" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Все</SelectItem>
+            <SelectItem value="all">Все</SelectItem>
             {APP_CONSTANTS.STUDY_FORMS.map((form) => (
               <SelectItem key={form.value} value={form.value}>
                 {form.label}
@@ -83,12 +83,12 @@ const ApplicantsFilters = ({
         </Select>
 
         {/* Специализация */}
-        <Select value={filters.specialization} onValueChange={(value) => onFilterChange('specialization', value)}>
+        <Select value={filters.specialization} onValueChange={(value) => onFilterChange('specialization', value === 'all' ? '' : value)}>
           <SelectTrigger>
             <SelectValue placeholder="Специализация" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Все</SelectItem>
+            <SelectItem value="all">Все</SelectItem>
             {specializations.map((spec) => (
               <SelectItem key={spec.id} value={spec.id}>
                 {spec.name}
@@ -98,24 +98,24 @@ const ApplicantsFilters = ({
         </Select>
 
         {/* Бюджет */}
-        <Select value={filters.budget} onValueChange={(value) => onFilterChange('budget', value)}>
+        <Select value={filters.budget} onValueChange={(value) => onFilterChange('budget', value === 'all' ? '' : value)}>
           <SelectTrigger>
             <SelectValue placeholder="Бюджет" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Все</SelectItem>
+            <SelectItem value="all">Все</SelectItem>
             <SelectItem value="true">Бюджет</SelectItem>
             <SelectItem value="false">Платно</SelectItem>
           </SelectContent>
         </Select>
 
         {/* Статус */}
-        <Select value={filters.status} onValueChange={(value) => onFilterChange('status', value)}>
+        <Select value={filters.status} onValueChange={(value) => onFilterChange('status', value === 'all' ? '' : value)}>
           <SelectTrigger>
             <SelectValue placeholder="Статус" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Все</SelectItem>
+            <SelectItem value="all">Все</SelectItem>
             <SelectItem value="pending">Ожидает</SelectItem>
             <SelectItem value="under_review">На рассмотрении</SelectItem>
             <SelectItem value="approved">Одобрено</SelectItem>
