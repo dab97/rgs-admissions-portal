@@ -65,7 +65,7 @@ const BasicInfoSection = ({
             value={applicant.citizenship || ''}
             onChange={(e) => onApplicantChange({
               ...applicant,
-              citizenship: e.target.value
+              citizenship: e.target.label
             })}
           />
         </div>
