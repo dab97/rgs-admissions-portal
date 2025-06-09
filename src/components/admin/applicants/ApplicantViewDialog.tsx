@@ -69,7 +69,7 @@ const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewD
             </div>
             <div>
               <Label>Гражданство</Label>
-              <div className="mt-1 text-sm">{applicant.citizenship || 'Не указано'}</div>
+              <div className="mt-1 text-sm">{applicant.citizenship.label || 'Не указано'}</div>
             </div>
             <div>
               <Label>Форма обучения</Label>
