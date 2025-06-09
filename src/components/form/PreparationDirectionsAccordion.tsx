@@ -81,13 +81,7 @@ const PreparationDirectionsAccordion = ({
     
     const allowedForms = config.studyFormRestrictions[specCode] || [];
     
-    const studyForms = [
-      { value: 'full_time', label: 'Очная' },
-      { value: 'part_time', label: 'Очно-заочная' },
-      { value: 'distance', label: 'Заочная' }
-    ];
-    
-    return studyForms.filter(form => allowedForms.includes(form.value));
+    return APP_CONSTANTS.STUDY_FORMS.filter(form => allowedForms.includes(form.value));
   };
 
   const updateDirection = (updates: Partial<PreparationDirection>) => {

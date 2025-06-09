@@ -1,10 +1,11 @@
+
 // Константы для приложения учета абитуриентов
 export const APP_CONSTANTS = {
   // Формы обучения
   STUDY_FORMS: [
-    { value: 'full_time', label: 'Очная' },
-    { value: 'part_time', label: 'Очно-заочная' },
-    { value: 'distance', label: 'Заочная' }
+    { value: 'Очная', label: 'Очная' },
+    { value: 'Очно-заочная', label: 'Очно-заочная' },
+    { value: 'Заочная', label: 'Заочная' }
   ],
 
   // Виды образования
@@ -18,17 +19,17 @@ export const APP_CONSTANTS = {
     bachelor: {
       available: ['psychology', 'management', 'social_work', 'law'],
       studyFormRestrictions: {
-        psychology: ['full_time', 'part_time'], // нет заочной
-        management: ['full_time'], // только очная
-        social_work: ['full_time', 'distance'], // очная и заочная
-        law: ['full_time'] // только очная
+        psychology: ['Очная', 'Очно-заочная'], // нет заочной
+        management: ['Очная'], // только очная
+        social_work: ['Очная', 'Заочная'], // очная и заочная
+        law: ['Очная'] // только очная
       }
     },
     master: {
       available: ['management', 'psychology'],
       studyFormRestrictions: {
-        management: ['distance'], // только заочная
-        psychology: ['part_time'] // только очно-заочная
+        management: ['Заочная'], // только заочная
+        psychology: ['Очно-заочная'] // только очно-заочная
       }
     }
   },
