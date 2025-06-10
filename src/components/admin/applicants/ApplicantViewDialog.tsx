@@ -36,6 +36,11 @@ const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewD
     return option ? option.label : value || 'Не указано';
   };
 
+  const getCitizenshipLabel = (value: string | null) => {
+    const citizenship = APP_CONSTANTS.CITIZENSHIPS.find(c => c.value === value);
+    return citizenship ? citizenship.label : value || 'Не указано';
+  };
+
   if (!applicant) return null;
 
   return (
@@ -69,7 +74,7 @@ const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewD
             </div>
             <div>
               <Label>Гражданство</Label>
-              <div className="mt-1 text-sm">{applicant.citizenship.label || 'Не указано'}</div>
+              <div className="mt-1 text-sm">{getCitizenshipLabel(applicant.citizenship)}</div>
             </div>
             <div>
               <Label>Форма обучения</Label>
