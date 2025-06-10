@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Applicant } from '@/hooks/useApplicants';
@@ -69,12 +70,12 @@ const AdditionalInfoSection = ({ applicant, onApplicantChange }: AdditionalInfoS
         </div>
         <div>
           <Label htmlFor="edit_contact_phone">Телефон контактного лица</Label>
-          <Input
+          <PhoneInput
             id="edit_contact_phone"
             value={applicant.contact_person_phone || ''}
-            onChange={(e) => onApplicantChange({
+            onChange={(value) => onApplicantChange({
               ...applicant,
-              contact_person_phone: e.target.value
+              contact_person_phone: value
             })}
           />
         </div>

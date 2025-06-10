@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { Label } from '@/components/ui/label';
 import { UserPlus, Phone, Mail } from 'lucide-react';
 
@@ -42,12 +43,11 @@ const ContactInfoSection = ({
         <Label htmlFor="phone">Номер телефона *</Label>
         <div className="relative">
           <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <Input
+          <PhoneInput
             id="phone"
-            placeholder="+375 (29) 123-45-67"
-            className="pl-10"
             value={phone}
-            onChange={(e) => onPhoneChange(e.target.value)}
+            onChange={onPhoneChange}
+            className="pl-10"
             required
           />
         </div>
