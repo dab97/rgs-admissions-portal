@@ -12,35 +12,25 @@ interface ApplicantViewDialogProps {
   applicant: Applicant | null;
 }
 
+const getStatusBadge = (status: string | null) => {
+  const statusConfig = {
+    approved: { bg: 'bg-green-100', text: 'text-green-700', label: 'Одобрено' },
+    rejected: { bg: 'bg-red-100', text: 'text-red-700', label: 'Отклонено' },
+    under_review: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'На рассмотрении' },
+    default: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Ожидает' }
+  };
+  
+  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.default;
+  return <Badge className={`${config.bg} ${config.text}`}>{config.label}</Badge>;
+};
+
+const getConstantLabel = (value: string | null, constants: any[]) => {
+  if (!value) return 'Не указано';
+  const item = constants.find(c => c.value === value);
+  return item ? item.label : value;
+};
+
 const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewDialogProps) => {
-  const getStatusBadge = (status: string | null) => {
-    switch (status) {
-      case 'approved':
-        return <Badge className="bg-green-100 text-green-700">Одобрено</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-100 text-red-700">Отклонено</Badge>;
-      case 'under_review':
-        return <Badge className="bg-blue-100 text-blue-700">На рассмотрении</Badge>;
-      default:
-        return <Badge className="bg-yellow-100 text-yellow-700">Ожидает</Badge>;
-    }
-  };
-
-  const getEducationDocumentLabel = (value: string | null) => {
-    const doc = APP_CONSTANTS.EDUCATION_DOCUMENTS.find(d => d.value === value);
-    return doc ? doc.label : value || 'Не указан';
-  };
-
-  const getHowDidYouKnowLabel = (value: string | null) => {
-    const option = APP_CONSTANTS.HOW_DID_YOU_KNOW_OPTIONS.find(o => o.value === value);
-    return option ? option.label : value || 'Не указано';
-  };
-
-  const getCitizenshipLabel = (value: string | null) => {
-    const citizenship = APP_CONSTANTS.CITIZENSHIPS.find(c => c.value === value);
-    return citizenship ? citizenship.label : value || 'Не указано';
-  };
-
   if (!applicant) return null;
 
   return (
@@ -66,26 +56,23 @@ const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewD
             <div>
               <Label>Пол</Label>
               <div className="mt-1 text-sm">
-                {applicant.gender ? 
-                  APP_CONSTANTS.GENDERS.find(g => g.value === applicant.gender)?.label || applicant.gender 
-                  : 'Не указан'
-                }
+                {getConstantLabel(applicant.gender, APP_CONSTANTS.GENDERS)}
               </div>
             </div>
             <div>
               <Label>Гражданство</Label>
-              <div className="mt-1 text-sm">{getCitizenshipLabel(applicant.citizenship)}</div>
+              <div className="mt-1 text-sm">{getConstantLabel(applicant.citizenship, APP_CONSTANTS.CITIZENSHIPS)}</div>
             </div>
             <div>
               <Label>Форма обучения</Label>
               <div className="mt-1 text-sm">
-                {APP_CONSTANTS.STUDY_FORMS.find(f => f.value === applicant.study_form)?.label || applicant.study_form}
+                {getConstantLabel(applicant.study_form, APP_CONSTANTS.STUDY_FORMS)}
               </div>
             </div>
             <div>
               <Label>Вид образования</Label>
               <div className="mt-1 text-sm">
-                {APP_CONSTANTS.EDUCATION_TYPES.find(t => t.value === applicant.education_type)?.label || applicant.education_type}
+                {getConstantLabel(applicant.education_type, APP_CONSTANTS.EDUCATION_TYPES)}
               </div>
             </div>
             <div>
@@ -110,7 +97,7 @@ const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewD
             </div>
             <div>
               <Label>Документ об образовании</Label>
-              <div className="mt-1 text-sm">{getEducationDocumentLabel(applicant.education_document)}</div>
+              <div className="mt-1 text-sm">{getConstantLabel(applicant.education_document, APP_CONSTANTS.EDUCATION_DOCUMENTS)}</div>
             </div>
           </div>
           
@@ -134,7 +121,7 @@ const ApplicantViewDialog = ({ isOpen, onOpenChange, applicant }: ApplicantViewD
 
           <div>
             <Label>Откуда узнали о нас</Label>
-            <div className="mt-1 text-sm">{getHowDidYouKnowLabel(applicant.how_did_you_know)}</div>
+            <div className="mt-1 text-sm">{getConstantLabel(applicant.how_did_you_know, APP_CONSTANTS.HOW_DID_YOU_KNOW_OPTIONS)}</div>
           </div>
 
           <div>
